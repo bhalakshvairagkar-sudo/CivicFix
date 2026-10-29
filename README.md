@@ -47,6 +47,7 @@ For evaluators, professors, and reviewers, exhaustive technical documentation an
 | **Transaction Safety** | [`docs/TRANSACTION_SAFETY_DEMO.md`](docs/TRANSACTION_SAFETY_DEMO.md) | ACID proof: atomic multi-table commit vs controlled failure with automatic ROLLBACK |
 | **Integration Test Suite** | [`docs/INTEGRATION_TEST_RESULTS.md`](docs/INTEGRATION_TEST_RESULTS.md) | Complete verification report: **26 / 26 automated tests passing (100%)** |
 | **Live Evaluator Demo** | [`docs/LIVE_DEMO_SCRIPT.md`](docs/LIVE_DEMO_SCRIPT.md) | 5-step evaluator live demonstration sequence with CLI orchestrator |
+| **Render UI Deployment** | [`docs/RENDER_DEPLOYMENT_GUIDE.md`](docs/RENDER_DEPLOYMENT_GUIDE.md) | 1-click & manual step-by-step guide for deploying React 19 UI on Render |
 
 ---
 

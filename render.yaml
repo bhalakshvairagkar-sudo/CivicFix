@@ -1,0 +1,35 @@
+# ==============================================================================
+# CivicFix - Render Blueprint Configuration
+# Deploy the User Interface (Static Site) with 1-click on Render.com
+# Documentation: https://render.com/docs/blueprint-spec
+# ==============================================================================
+
+services:
+  # ----------------------------------------------------------------------------
+  # 1. CivicFix User Interface (React 19 + Vite Static Site)
+  # ----------------------------------------------------------------------------
+  - type: web
+    name: civicfix-ui
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    routes:
+      # SPA Rewrite: reroute all paths to index.html for client-side routing
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: SAMEORIGIN
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+    envVars:
+      # Point to your deployed FastAPI backend URL (e.g., https://civicfix-api.onrender.com)
+      # If left blank, it defaults to relative '/api'
+      - key: VITE_API_BASE_URL
+        sync: false
+      - key: VITE_GOOGLE_MAPS_API_KEY
+        sync: false
