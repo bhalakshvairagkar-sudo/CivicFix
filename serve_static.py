@@ -12,14 +12,28 @@ from pathlib import Path
 
 PORT = int(os.environ.get("PORT", 8000))
 
-# Locate dist directory (check root dist, then frontend/dist)
-ROOT_DIR = Path(__file__).resolve().parent
-DIST_DIR = ROOT_DIR / "dist"
-if not DIST_DIR.exists():
-    DIST_DIR = ROOT_DIR / "frontend" / "dist"
+# Search for dist directory in multiple possible relative locations
+candidates = [
+    Path(__file__).resolve().parent / "dist",
+    Path(__file__).resolve().parent.parent / "dist",
+    Path(__file__).resolve().parent.parent.parent / "dist",
+    Path.cwd() / "dist",
+    Path.cwd().parent / "dist",
+    Path.cwd().parent.parent / "dist",
+    Path.cwd() / "frontend" / "dist",
+    Path.cwd().parent / "frontend" / "dist",
+]
 
-if not DIST_DIR.exists() or not (DIST_DIR / "index.html").exists():
-    print(f"[ERROR] Built UI files not found in {DIST_DIR}. Did the build step run?")
+DIST_DIR = None
+for cand in candidates:
+    if cand.exists() and (cand / "index.html").exists():
+        DIST_DIR = cand.resolve()
+        break
+
+if not DIST_DIR:
+    print("[ERROR] Built UI files (dist/index.html) not found in any candidate directory:")
+    for c in candidates:
+        print(f"  - {c}")
     sys.exit(1)
 
 class SPAHandler(http.server.SimpleHTTPRequestHandler):
