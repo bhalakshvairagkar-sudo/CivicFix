@@ -13,7 +13,6 @@ sys.path.append(str(backend_dir))
 
 from config import settings
 from security import hash_password
-from scripts.db_lifecycle import ensure_mysql_running
 import logging
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -36,10 +35,9 @@ PHOTO_FOOTPATH = "https://images.unsplash.com/photo-1590674899484-d5640e854abe?w
 PHOTO_FOOTPATH_FIXED = "https://images.unsplash.com/photo-1506157786151-b8491531f063?w=600&auto=format&fit=crop&q=80"
 
 def get_connection():
-    ensure_mysql_running()
     return pymysql.connect(
         host=settings.DB_HOST,
-        port=settings.DB_PORT,
+        port=int(settings.DB_PORT),
         user=settings.DB_USER,
         password=settings.DB_PASSWORD,
         database=settings.DB_NAME,
@@ -490,21 +488,21 @@ def seed_all():
         logger.info("Seeding work orders...")
         work_orders_data = [
             # Work Order 1: Active In Progress on Hospital Pothole
-            ("WO-2026-0001", "CAS-2026-0001", "ROADS", "Foreman Mike Taylor", "Apex Roadworks Ltd.", 3800.00, 4100.00, 7.89, now + timedelta(days=1), None, "High-grade polymer asphalt, bitumen tack coat, compactor", "Asphalt mill & overlay underway. Police detail managing emergency traffic.", "IN_PROGRESS"),
+            ("WO-2026-0001", "CAS-2026-0001", "ROADS", "Foreman Mike Taylor", "Apex Roadworks Ltd.", 3800.00, 4100.00, now - timedelta(days=2), now + timedelta(days=1), None, "High-grade polymer asphalt, bitumen tack coat, compactor", "Asphalt mill & overlay underway. Police detail managing emergency traffic.", "IN_PROGRESS"),
             # Work Order 2: Scheduled on School Exposed Cable
-            ("WO-2026-0002", "CAS-2026-0002", "LIGHTING", "Electrician Leo Adams", "Municipal Lighting Crew A", 650.00, 0.00, 0.00, now + timedelta(days=1), None, "Insulated wiring harness, tamper-proof steel access door", "Scheduled for emergency isolation prior to school morning bell.", "SCHEDULED"),
+            ("WO-2026-0002", "CAS-2026-0002", "LIGHTING", "Electrician Leo Adams", "Municipal Lighting Crew A", 650.00, 0.00, now - timedelta(days=1), now + timedelta(days=1), None, "Insulated wiring harness, tamper-proof steel access door", "Scheduled for emergency isolation prior to school morning bell.", "SCHEDULED"),
             # Work Order 3: Completed on Commercial St (Suspicious fast closure demo)
-            ("WO-2026-0003", "CAS-2026-0004", "ROADS", "Crew Lead Jack Miller", "QuickPatch Contractors", 900.00, 850.00, -5.55, now - timedelta(days=5), now - timedelta(days=5, hours=23), "Cold mix asphalt patch", "Quick patch applied to road edge.", "WORK_COMPLETED"),
+            ("WO-2026-0003", "CAS-2026-0004", "ROADS", "Crew Lead Jack Miller", "QuickPatch Contractors", 900.00, 850.00, now - timedelta(days=6), now - timedelta(days=5), now - timedelta(days=5, hours=23), "Cold mix asphalt patch", "Quick patch applied to road edge.", "WORK_COMPLETED"),
             # Work Order 4: Cost Overrun Demo on Water Main
-            ("WO-2026-0004", "CAS-2026-0005", "DRAINAGE", "Engineer Nathan Drake", "Metropolitan Pipeline Corp.", 4200.00, 7850.00, 86.90, now - timedelta(days=2), now - timedelta(days=2), "12-inch stainless clamp, 4m ductile iron pipe replacement, gravel backfill", "Excavation revealed unforeseen corrosion extending 4 meters beyond initial estimate.", "WORK_COMPLETED"),
+            ("WO-2026-0004", "CAS-2026-0005", "DRAINAGE", "Engineer Nathan Drake", "Metropolitan Pipeline Corp.", 4200.00, 7850.00, now - timedelta(days=4), now - timedelta(days=2), now - timedelta(days=2), "12-inch stainless clamp, 4m ductile iron pipe replacement, gravel backfill", "Excavation revealed unforeseen corrosion extending 4 meters beyond initial estimate.", "WORK_COMPLETED"),
         ]
 
         wo_ids_map = {}
-        for wo_num, c_num, d_code, lead, contractor, est_cost, act_cost, var_pct, target_dt, act_dt, mats, notes, stat in work_orders_data:
+        for wo_num, c_num, d_code, lead, contractor, est_cost, act_cost, created_dt, target_dt, act_dt, mats, notes, stat in work_orders_data:
             cur.execute("""
                 INSERT INTO work_orders (
                     work_order_number, case_id, department_id, assigned_team_leader,
-                    contractor_name, estimated_cost, actual_cost, cost_variance_pct,
+                    contractor_name, estimated_cost, actual_cost, created_at,
                     target_completion_date, actual_completion_date, materials_used, work_notes, status
                 ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
@@ -515,7 +513,7 @@ def seed_all():
                 contractor,
                 est_cost,
                 act_cost,
-                var_pct,
+                created_dt,
                 target_dt,
                 act_dt,
                 mats,

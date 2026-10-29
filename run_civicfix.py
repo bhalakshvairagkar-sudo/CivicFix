@@ -48,80 +48,75 @@ def free_port(port: int):
     except Exception:
         pass
 
-def can_connect_db() -> bool:
+from config import settings
+
+def get_python_bin() -> str:
+    """Returns the virtual environment python if present, else sys.executable."""
+    venv_py = CIVICFIX_ROOT / ".venv" / "Scripts" / "python.exe"
+    if venv_py.exists():
+        return str(venv_py)
+    return sys.executable
+
+def check_mysql_status() -> tuple[bool, str]:
+    """Tests MySQL connectivity with explicit diagnostic status."""
     try:
         import pymysql
-        conn = pymysql.connect(host="127.0.0.1", port=3308, user="root", password="", database="civicfix_db", connect_timeout=1)
+        conn = pymysql.connect(
+            host=settings.DB_HOST,
+            port=int(settings.DB_PORT),
+            user=settings.DB_USER,
+            password=settings.DB_PASSWORD,
+            connect_timeout=2
+        )
+        with conn.cursor() as cur:
+            cur.execute("SELECT VERSION();")
+            ver = cur.fetchone()[0]
         conn.close()
-        return True
-    except Exception:
-        return False
-
-def ensure_mysql():
-    print("[1/4] Checking MySQL Database Service on port 3308...")
-    if can_connect_db():
-        print("      [OK] MySQL Server is online and accepting connections on port 3308.")
-        return
-
-    datadir = WORKSPACE_ROOT / "mysql_local_data"
-    mysqld_candidates = [
-        r"C:\Program Files\MySQL\MySQL Server 9.7\bin\mysqld.exe",
-        r"C:\Program Files\MySQL\MySQL Server 8.4\bin\mysqld.exe",
-        r"C:\Program Files\MySQL\MySQL Server 8.0\bin\mysqld.exe",
-    ]
-    mysqld_bin = None
-    for c in mysqld_candidates:
-        if os.path.exists(c):
-            mysqld_bin = c
-            break
-
-    if not mysqld_bin:
-        print("      [WARNING] mysqld.exe not found in standard paths. Attempting connection...")
-        return
-
-    print("      [INFO] Starting MySQL daemon on dedicated port 3308...")
-    cmd = [
-        mysqld_bin,
-        "--no-defaults",
-        f"--datadir={datadir}",
-        "--port=3308",
-        "--bind-address=127.0.0.1",
-        "--mysqlx=0",
-        "--console"
-    ]
-    flags = 0x00000008 | 0x00000200 if sys.platform == "win32" else 0
-    try:
-        subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, creationflags=flags)
+        return True, f"Connected to MySQL {ver} on {settings.DB_HOST}:{settings.DB_PORT}"
     except Exception as e:
-        print(f"      [WARNING] Process launch note: {e}")
+        return False, str(e)
 
-    for i in range(12):
-        time.sleep(1)
-        if can_connect_db():
-            print(f"      [OK] MySQL daemon is online and verified on port 3308.")
-            return
-
-    print("      [WARNING] MySQL daemon wait finished. Proceeding with application boot...")
+def verify_mysql_preflight():
+    print(f"[1/4] Checking MySQL Database Service on {settings.DB_HOST}:{settings.DB_PORT}...")
+    success, msg = check_mysql_status()
+    if success:
+        print(f"      [OK] {msg}")
+        return True
+    
+    print(f"      [ERROR] Could not connect to MySQL server at {settings.DB_HOST}:{settings.DB_PORT}")
+    print(f"      Diagnostic detail: {msg}")
+    print("      Troubleshooting tips:")
+    print("      1. Ensure your MySQL Windows service is running (e.g., in PowerShell: 'Start-Service MySQL97')")
+    print("      2. Verify DB_PORT, DB_USER, and DB_PASSWORD in backend/.env")
+    return False
 
 def ensure_database_seeded():
     print("[2/4] Verifying CivicFix database and schema...")
+    py_bin = get_python_bin()
     try:
         import pymysql
-        conn = pymysql.connect(host="127.0.0.1", port=3308, user="root", password="", charset="utf8mb4")
+        conn = pymysql.connect(
+            host=settings.DB_HOST,
+            port=int(settings.DB_PORT),
+            user=settings.DB_USER,
+            password=settings.DB_PASSWORD,
+            charset="utf8mb4",
+            connect_timeout=2
+        )
         with conn.cursor() as cur:
-            cur.execute("SHOW DATABASES LIKE 'civicfix_db';")
+            cur.execute("SHOW DATABASES LIKE %s;", (settings.DB_NAME,))
             exists = cur.fetchone()
         conn.close()
 
         if not exists:
-            print("      [INFO] Initializing civicfix_db schema and seed records...")
+            print(f"      [INFO] Initializing '{settings.DB_NAME}' schema and seed records...")
             init_script = backend_path / "scripts" / "init_db.py"
             seed_script = backend_path / "scripts" / "seed_data.py"
-            subprocess.run([sys.executable, str(init_script)], check=True)
-            subprocess.run([sys.executable, str(seed_script)], check=True)
+            subprocess.run([py_bin, str(init_script)], check=True)
+            subprocess.run([py_bin, str(seed_script)], check=True)
             print("      [OK] Database successfully initialized and seeded.")
         else:
-            print("      [OK] Database civicfix_db exists with tables and seeded records.")
+            print(f"      [OK] Database '{settings.DB_NAME}' verified with tables.")
     except Exception as e:
         print(f"      [NOTICE] Database check notice: {e}")
 
@@ -140,8 +135,8 @@ def main():
     print("=" * 75)
     print()
 
-    # Step 1: MySQL Service
-    ensure_mysql()
+    # Step 1: MySQL Service Preflight
+    verify_mysql_preflight()
 
     # Step 2: Database and Schema
     ensure_database_seeded()
@@ -152,8 +147,9 @@ def main():
 
     print("[3/4] Launching FastAPI Backend and React Frontend...")
 
-    # Launch Backend
-    backend_cmd = [sys.executable, "-m", "uvicorn", "main:app", "--host", "127.0.0.1", "--port", "8000"]
+    # Launch Backend using virtual environment python
+    py_bin = get_python_bin()
+    backend_cmd = [py_bin, "-m", "uvicorn", "main:app", "--host", "127.0.0.1", "--port", "8000"]
     backend_proc = subprocess.Popen(
         backend_cmd,
         cwd=str(backend_path)

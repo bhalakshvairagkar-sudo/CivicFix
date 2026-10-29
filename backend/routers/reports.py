@@ -112,8 +112,8 @@ def submit_report(payload: ReportCreate, current_user: dict = Depends(get_curren
             target_case_id = candidates[0]["case_id"]
             is_primary = False
 
-            # Update existing case's linked count and recalculate priority
-            cur.execute("SELECT total_linked_reports, created_at, severity, is_recurring_failure FROM repair_cases WHERE case_id = %s", (target_case_id,))
+            # Row-level lock existing case to serialize concurrent duplicate increments
+            cur.execute("SELECT total_linked_reports, created_at, severity, is_recurring_failure FROM repair_cases WHERE case_id = %s FOR UPDATE", (target_case_id,))
             target_case = cur.fetchone()
             new_linked_count = (target_case["total_linked_reports"] or 1) + 1
 

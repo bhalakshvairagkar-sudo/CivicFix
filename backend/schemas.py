@@ -68,10 +68,12 @@ class ReportResponse(BaseModel):
 class CaseAssign(BaseModel):
     department_id: int
     notes: Optional[str] = None
+    expected_version: Optional[int] = None
 
 class CaseStatusUpdate(BaseModel):
     status: str = Field(pattern="^(OPEN|ASSIGNED|IN_PROGRESS|REPAIR_COMPLETED|VERIFIED_CLOSED|REOPENED)$")
     notes: Optional[str] = None
+    expected_version: Optional[int] = None
 
 class DuplicateMergeRequest(BaseModel):
     secondary_case_id: int

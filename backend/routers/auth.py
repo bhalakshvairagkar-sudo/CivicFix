@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status, Depends
 from database import get_db_cursor
-from security import hash_password, verify_password, create_access_token, get_current_user
+from security import hash_password, verify_password, create_access_token, get_current_user, require_admin
 from schemas import UserLogin, UserRegister, TokenResponse, UserProfile
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
@@ -42,11 +42,55 @@ def login(payload: UserLogin):
     }
     return {"access_token": token, "token_type": "bearer", "user": user_info}
 
-@router.post("/register", response_model=TokenResponse)
+@router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
 def register(payload: UserRegister):
-    """Registers a new citizen or staff account."""
+    """
+    Public registration endpoint.
+    Strictly forces role='CITIZEN' to prevent privilege escalation.
+    """
+    assigned_role = "CITIZEN"
+    assigned_dept = None
+
     with get_db_cursor() as cur:
         # Check email uniqueness
+        cur.execute("SELECT user_id FROM users WHERE email = %s", (payload.email,))
+        if cur.fetchone():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="An account with this email address already exists."
+            )
+
+        pwd_hash = hash_password(payload.password)
+        cur.execute("""
+            INSERT INTO users (email, password_hash, full_name, role, department_id, phone)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (payload.email, pwd_hash, payload.full_name, assigned_role, assigned_dept, payload.phone))
+        new_id = cur.lastrowid
+
+    token = create_access_token(data={"sub": str(new_id), "role": assigned_role})
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "user": {
+            "user_id": new_id,
+            "email": payload.email,
+            "full_name": payload.full_name,
+            "role": assigned_role,
+            "department_id": None,
+            "department_name": None,
+            "department_code": None
+        }
+    }
+
+@router.post("/staff", response_model=TokenResponse)
+def create_staff_user(
+    payload: UserRegister,
+    current_admin: dict = Depends(require_admin)
+):
+    """
+    Admin-only endpoint for provisioning STAFF and ADMIN municipal user accounts.
+    """
+    with get_db_cursor() as cur:
         cur.execute("SELECT user_id FROM users WHERE email = %s", (payload.email,))
         if cur.fetchone():
             raise HTTPException(

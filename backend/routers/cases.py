@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, status, Depends, Query
 from typing import Optional, List
 import json
 from datetime import datetime, timezone
+import pymysql
 
 from database import get_db_cursor, transaction_cursor
 from security import get_current_user, require_staff_or_admin, require_admin
@@ -218,7 +219,7 @@ def get_duplicate_candidates_for_case(case_id: int):
 def merge_duplicate_case(
     case_id: int,
     payload: DuplicateMergeRequest,
-    current_user: dict = Depends(require_staff_or_admin)
+    current_user: dict = Depends(require_admin)
 ):
     """
     ⭐ DBMS TRANSACTION HIGHLIGHT:
@@ -235,15 +236,22 @@ def merge_duplicate_case(
         raise HTTPException(status_code=400, detail="Cannot merge a case into itself.")
 
     with transaction_cursor() as cur:
-        # Validate target case
-        cur.execute("SELECT case_id, case_number, status, severity, created_at, is_recurring_failure, latitude, longitude FROM repair_cases WHERE case_id = %s FOR UPDATE", (case_id,))
-        target_case = cur.fetchone()
+        # Deadlock prevention: sort IDs deterministically before acquiring row locks
+        low_id, high_id = sorted([case_id, payload.secondary_case_id])
+        cur.execute("""
+            SELECT case_id, case_number, status, severity, created_at, is_recurring_failure, latitude, longitude, description, version
+            FROM repair_cases
+            WHERE case_id IN (%s, %s)
+            ORDER BY case_id
+            FOR UPDATE
+        """, (low_id, high_id))
+        locked = {row["case_id"]: row for row in cur.fetchall()}
+
+        target_case = locked.get(case_id)
         if not target_case:
             raise HTTPException(status_code=404, detail=f"Target case #{case_id} not found.")
 
-        # Validate secondary case
-        cur.execute("SELECT case_id, case_number, status, description FROM repair_cases WHERE case_id = %s FOR UPDATE", (payload.secondary_case_id,))
-        sec_case = cur.fetchone()
+        sec_case = locked.get(payload.secondary_case_id)
         if not sec_case:
             raise HTTPException(status_code=404, detail=f"Secondary case #{payload.secondary_case_id} not found.")
 
@@ -330,12 +338,18 @@ def assign_case_department(
     payload: CaseAssign,
     current_user: dict = Depends(require_staff_or_admin)
 ):
-    """Assigns or transfers a repair case to a department."""
+    """Assigns or transfers a repair case to a department with concurrency control."""
     with transaction_cursor() as cur:
-        cur.execute("SELECT case_id, case_number, department_id, status FROM repair_cases WHERE case_id = %s", (case_id,))
+        cur.execute("SELECT case_id, case_number, department_id, status, version FROM repair_cases WHERE case_id = %s FOR UPDATE", (case_id,))
         case = cur.fetchone()
         if not case:
             raise HTTPException(status_code=404, detail="Case not found.")
+
+        if payload.expected_version is not None and case["version"] != payload.expected_version:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Conflict: Case #{case['case_number']} has been modified concurrently. (Current version: {case['version']}, expected: {payload.expected_version})."
+            )
 
         cur.execute("SELECT department_id, name, code FROM departments WHERE department_id = %s", (payload.department_id,))
         dept = cur.fetchone()
@@ -362,12 +376,16 @@ def assign_case_department(
             case_id,
             current_user["user_id"],
             current_user["full_name"],
-            json.dumps({"department_id": old_dept_id}),
-            json.dumps({"department_id": payload.department_id, "department_name": dept["name"]}),
+            json.dumps({"department_id": old_dept_id, "version": case["version"]}),
+            json.dumps({"department_id": payload.department_id, "department_name": dept["name"], "version": case["version"] + 1}),
             f"Assigned Case #{case['case_number']} to department '{dept['name']}'."
         ))
 
-    return {"message": f"Case assigned to {dept['name']} successfully."}
+    return {
+        "message": f"Case assigned to {dept['name']} successfully.",
+        "case_number": case["case_number"],
+        "new_version": case["version"] + 1
+    }
 
 @router.patch("/{case_id}/status")
 def update_case_status(
@@ -376,24 +394,51 @@ def update_case_status(
     current_user: dict = Depends(require_staff_or_admin)
 ):
     """
+    ⭐ DBMS TRANSACTION & CONCURRENCY HIGHLIGHT:
     Updates case status with optimistic concurrency control.
+    - Prevents lost updates when expected_version is specified.
+    - Atomically updates case, linked citizen reports, and records audit log.
+    - Automatically rolls back all writes if any statement fails.
     """
     with transaction_cursor() as cur:
-        cur.execute("SELECT case_id, case_number, status, version FROM repair_cases WHERE case_id = %s", (case_id,))
+        cur.execute("SELECT case_id, case_number, status, version FROM repair_cases WHERE case_id = %s FOR UPDATE", (case_id,))
         case = cur.fetchone()
         if not case:
             raise HTTPException(status_code=404, detail="Case not found.")
 
-        old_status = case["status"]
-        closed_at_clause = ", closed_at = NOW()" if payload.status == "VERIFIED_CLOSED" else ""
+        # Optimistic concurrency check: if client provided expected_version, detect conflict
+        if payload.expected_version is not None and case["version"] != payload.expected_version:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Conflict: Case #{case['case_number']} has been concurrently modified by another user. (Current version: {case['version']}, expected: {payload.expected_version}). Please refresh and try again."
+            )
 
-        cur.execute(f"""
-            UPDATE repair_cases
-            SET status = %s,
-                version = version + 1
-                {closed_at_clause}
-            WHERE case_id = %s
-        """, (payload.status, case_id))
+        old_status = case["status"]
+
+        # Set session context so authoritative DB trigger logs user metadata
+        cur.execute("SET @app_current_user_id = %s, @app_current_user_name = %s", (current_user["user_id"], current_user["full_name"]))
+
+        if payload.expected_version is not None:
+            cur.execute("""
+                UPDATE repair_cases
+                SET status = %s,
+                    version = version + 1,
+                    closed_at = CASE WHEN %s = 'VERIFIED_CLOSED' THEN NOW() ELSE closed_at END
+                WHERE case_id = %s AND version = %s
+            """, (payload.status, payload.status, case_id, payload.expected_version))
+            if cur.rowcount == 0:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail=f"Conflict: Concurrent modification detected on Case #{case['case_number']}."
+                )
+        else:
+            cur.execute("""
+                UPDATE repair_cases
+                SET status = %s,
+                    version = version + 1,
+                    closed_at = CASE WHEN %s = 'VERIFIED_CLOSED' THEN NOW() ELSE closed_at END
+                WHERE case_id = %s
+            """, (payload.status, payload.status, case_id))
 
         # Also update linked reports status
         report_status_map = {
@@ -408,20 +453,46 @@ def update_case_status(
                 WHERE case_id = %s
             """, (report_status_map[payload.status], case_id))
 
-        cur.execute("""
-            INSERT INTO audit_logs (
-                action_type, entity_type, entity_id, performed_by_user_id,
-                actor_name, old_state, new_state, change_summary
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-        """, (
-            "STATUS_CHANGE",
-            "REPAIR_CASE",
-            case_id,
-            current_user["user_id"],
-            current_user["full_name"],
-            json.dumps({"status": old_status}),
-            json.dumps({"status": payload.status, "notes": payload.notes}),
-            f"Case #{case['case_number']} status changed from {old_status} to {payload.status}."
-        ))
+        # Note: Status change audit trail is authoritatively recorded by DB Trigger trg_audit_case_critical_changes
 
-    return {"message": f"Case status updated to {payload.status}."}
+    return {
+        "message": f"Case status updated to {payload.status}.",
+        "case_number": case["case_number"],
+        "new_version": case["version"] + 1
+    }
+
+@router.post("/{case_id}/transition-procedure")
+def transition_case_procedure(
+    case_id: int,
+    payload: CaseStatusUpdate,
+    current_user: dict = Depends(require_staff_or_admin)
+):
+    """
+    ⭐ DBMS STORED PROCEDURE HIGHLIGHT:
+    Executes MySQL Stored Procedure `sp_transition_case_status`.
+    Enforces server-side state machine rules and throws SQLSTATE 45000 on invalid transitions.
+    """
+    with transaction_cursor() as cur:
+        try:
+            cur.execute("""
+                CALL sp_transition_case_status(
+                    %s, %s, %s, %s, %s, @p_success, @p_message
+                );
+            """, (
+                case_id,
+                payload.status,
+                current_user["user_id"],
+                current_user["full_name"],
+                payload.notes or ""
+            ))
+            cur.execute("SELECT @p_success AS success, @p_message AS message;")
+            result = cur.fetchone()
+            if not result or not result["success"]:
+                raise HTTPException(status_code=400, detail=result["message"] if result else "Procedure execution failed.")
+        except pymysql.err.OperationalError as e:
+            # Handle SQLSTATE 45000 custom exceptions from stored procedure
+            err_code, err_msg = e.args
+            raise HTTPException(status_code=400, detail=f"DBMS Stored Procedure Error: {err_msg}")
+
+    return {"status": "success", "message": result["message"]}
+

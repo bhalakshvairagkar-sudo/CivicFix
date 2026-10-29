@@ -112,6 +112,7 @@ def closure_decision(
             FROM repair_inspections i
             JOIN repair_cases c ON i.case_id = c.case_id
             WHERE i.inspection_id = %s
+            FOR UPDATE
         """, (inspection_id,))
         insp = cur.fetchone()
 

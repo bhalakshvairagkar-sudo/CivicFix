@@ -16,57 +16,15 @@ import logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("civicfix.init_db")
 
-def is_port_open(host: str, port: int) -> bool:
+def test_mysql_ready(host: str, port: int, timeout: float = 2.0) -> bool:
+    """Checks if the target host and port accepts socket connections."""
     s = socket.socket()
+    s.settimeout(timeout)
     try:
         res = s.connect_ex((host, port))
         return res == 0
     finally:
         s.close()
-
-def ensure_mysql_running():
-    """Checks port 3307; if not open, launches mysqld in detached mode."""
-    if is_port_open(settings.DB_HOST, settings.DB_PORT):
-        logger.info(f"MySQL is already active on port {settings.DB_PORT}.")
-        return
-
-    logger.info(f"MySQL not detected on port {settings.DB_PORT}. Spawning daemon...")
-    workspace_root = backend_dir.parent.parent
-    datadir = workspace_root / "mysql_local_data"
-    mysqld_paths = [
-        r"C:\Program Files\MySQL\MySQL Server 9.7\bin\mysqld.exe",
-        r"C:\Program Files\MySQL\MySQL Server 8.4\bin\mysqld.exe",
-        r"C:\Program Files\MySQL\MySQL Server 8.0\bin\mysqld.exe",
-    ]
-    mysqld_bin = None
-    for p in mysqld_paths:
-        if os.path.exists(p):
-            mysqld_bin = p
-            break
-
-    if not mysqld_bin:
-        raise RuntimeError("mysqld executable not found on host machine.")
-
-    cmd = [
-        mysqld_bin,
-        "--no-defaults",
-        f"--datadir={datadir}",
-        f"--port={settings.DB_PORT}",
-        "--bind-address=0.0.0.0",
-        "--mysqlx=0",
-        "--console"
-    ]
-
-    flags = 0x00000008 | 0x00000200 if sys.platform == "win32" else 0
-    subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, creationflags=flags)
-
-    for i in range(12):
-        time.sleep(1)
-        if is_port_open(settings.DB_HOST, settings.DB_PORT):
-            logger.info(f"MySQL successfully started on port {settings.DB_PORT} (in {i+1}s).")
-            return
-
-    raise RuntimeError(f"MySQL failed to accept connections on port {settings.DB_PORT}.")
 
 def run_sql_file(conn, file_path: Path):
     """Executes multi-statement SQL script safely."""
@@ -111,18 +69,30 @@ def run_sql_file(conn, file_path: Path):
 
 def init_database(drop_existing: bool = False):
     """Initializes the database, schemas, views, and stored procedures."""
-    ensure_mysql_running()
+    if not test_mysql_ready(settings.DB_HOST, int(settings.DB_PORT)):
+        raise ConnectionError(
+            f"MySQL is not accepting connections at {settings.DB_HOST}:{settings.DB_PORT}. "
+            f"Please ensure your MySQL Windows service is started (e.g. 'Start-Service MySQL97')."
+        )
 
-    logger.info(f"Connecting to MySQL at {settings.DB_HOST}:{settings.DB_PORT}...")
-    
-    admin_conn = pymysql.connect(
-        host=settings.DB_HOST,
-        port=settings.DB_PORT,
-        user=settings.DB_USER,
-        password=settings.DB_PASSWORD,
-        charset="utf8mb4",
-        autocommit=True
-    )
+    logger.info(f"Connecting to MySQL admin server at {settings.DB_HOST}:{settings.DB_PORT} as '{settings.DB_USER}'...")
+    try:
+        admin_conn = pymysql.connect(
+            host=settings.DB_HOST,
+            port=int(settings.DB_PORT),
+            user=settings.DB_USER,
+            password=settings.DB_PASSWORD,
+            charset="utf8mb4",
+            autocommit=True
+        )
+    except pymysql.err.OperationalError as e:
+        if e.args[0] == 1045:
+            raise PermissionError(
+                f"Access denied for user '{settings.DB_USER}'@'{settings.DB_HOST}'. "
+                f"Please update DB_PASSWORD in backend/.env with your valid MySQL password."
+            ) from e
+        raise e
+
     with admin_conn.cursor() as cur:
         if drop_existing:
             logger.warning(f"Dropping existing database {settings.DB_NAME}...")
@@ -132,7 +102,7 @@ def init_database(drop_existing: bool = False):
 
     conn = pymysql.connect(
         host=settings.DB_HOST,
-        port=settings.DB_PORT,
+        port=int(settings.DB_PORT),
         user=settings.DB_USER,
         password=settings.DB_PASSWORD,
         database=settings.DB_NAME,

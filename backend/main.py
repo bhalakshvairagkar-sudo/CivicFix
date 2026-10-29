@@ -1,6 +1,6 @@
 import logging
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 
 from config import settings
@@ -55,11 +55,15 @@ app.include_router(audit_router)
 app.include_router(dbms_insights_router)
 
 @app.get("/api/health")
-def health_check():
+def health_check(response: Response):
     """Health check endpoint verifying backend and database connectivity."""
     db_status = ping_database()
+    is_connected = db_status.get("status") == "connected"
+    if not is_connected:
+        response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+
     return {
-        "status": "healthy" if db_status.get("status") == "connected" else "degraded",
+        "status": "healthy" if is_connected else "degraded",
         "app": "CivicFix Backend",
         "database": db_status
     }

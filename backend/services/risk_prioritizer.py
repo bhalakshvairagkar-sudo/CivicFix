@@ -59,8 +59,9 @@ def calculate_priority_score(
     # Linked duplicates represent real multiple citizens confirming the hazard
     citizen_bonus = min(15.0, round(((linked_reports_count - 1) * 3.0) + (upvotes_count * 0.5), 1))
 
-    # Total Score
-    total_score = round(base_severity + age_penalty + recurrence_penalty + sensitive_penalty + citizen_bonus, 1)
+    # Total Score (guaranteed between 0.00 and 100.00 per MySQL constraint chk_case_priority_score)
+    raw_score = round(base_severity + age_penalty + recurrence_penalty + sensitive_penalty + citizen_bonus, 1)
+    total_score = min(100.0, max(0.0, raw_score))
 
     # Priority Classification
     if total_score >= 70.0:

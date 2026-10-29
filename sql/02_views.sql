@@ -117,3 +117,47 @@ FROM departments d
 LEFT JOIN repair_cases c ON d.department_id = c.department_id
 LEFT JOIN work_orders w ON d.department_id = w.department_id
 GROUP BY d.department_id, d.code, d.name, d.annual_budget, d.spent_budget;
+
+-- ------------------------------------------------------------------------------
+-- View 4: vw_case_summary
+-- Demonstrable reporting view grouping cases by status and severity
+-- ------------------------------------------------------------------------------
+CREATE OR REPLACE VIEW vw_case_summary AS
+SELECT
+    status,
+    severity,
+    COUNT(*) AS total_cases,
+    ROUND(AVG(priority_score), 2) AS avg_priority_score,
+    SUM(total_linked_reports) AS total_reports_represented
+FROM repair_cases
+GROUP BY status, severity;
+
+-- ------------------------------------------------------------------------------
+-- View 5: vw_open_cases_staff
+-- Demonstrable operational view: Open repair cases with their department
+-- and assigned staff / contractor lead
+-- ------------------------------------------------------------------------------
+CREATE OR REPLACE VIEW vw_open_cases_staff AS
+SELECT 
+    c.case_id,
+    c.case_number,
+    c.title,
+    c.category,
+    c.severity,
+    c.status,
+    c.priority_score,
+    c.priority_level,
+    c.created_at,
+    d.department_id,
+    d.name AS department_name,
+    d.code AS department_code,
+    w.work_order_id,
+    w.work_order_number,
+    w.assigned_team_leader,
+    w.contractor_name,
+    w.status AS work_order_status
+FROM repair_cases c
+JOIN departments d ON c.department_id = d.department_id
+LEFT JOIN work_orders w ON c.case_id = w.case_id AND w.status IN ('SCHEDULED', 'CREW_DISPATCHED', 'IN_PROGRESS')
+WHERE c.status IN ('OPEN', 'ASSIGNED', 'IN_PROGRESS', 'REOPENED');
+

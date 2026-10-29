@@ -157,3 +157,127 @@ def run_benchmark(payload: BenchmarkRequest):
     """
     result = run_performance_benchmark(query_type=payload.query_type, limit=payload.limit)
     return result
+
+# ------------------------------------------------------------------------------
+# Phase 5: Advanced Demonstrable DBMS Features
+# ------------------------------------------------------------------------------
+
+@router.get("/views/case-summary")
+def get_view_case_summary():
+    """
+    ⭐ DBMS VIEW HIGHLIGHT:
+    Queries the reporting view `vw_case_summary`.
+    Aggregates active records dynamically across status and severity dimensions.
+    """
+    with get_db_cursor() as cur:
+        cur.execute("SELECT * FROM vw_case_summary ORDER BY total_cases DESC;")
+        rows = cur.fetchall()
+    return {"view_name": "vw_case_summary", "count": len(rows), "data": rows}
+
+@router.get("/views/open-cases-staff")
+def get_view_open_cases_staff():
+    """
+    ⭐ DBMS VIEW HIGHLIGHT:
+    Queries the operational view `vw_open_cases_staff`.
+    Joins open repair cases with department and dispatched work order team leaders.
+    """
+    with get_db_cursor() as cur:
+        cur.execute("SELECT * FROM vw_open_cases_staff ORDER BY priority_score DESC;")
+        rows = cur.fetchall()
+    return {"view_name": "vw_open_cases_staff", "count": len(rows), "data": rows}
+
+@router.get("/queries/case-aggregation")
+def get_case_aggregations():
+    """
+    ⭐ DBMS AGGREGATE QUERY HIGHLIGHT:
+    Multi-dimensional aggregate query counting cases by status, department, and severity.
+    Matches underlying records accurately.
+    """
+    with get_db_cursor() as cur:
+        cur.execute("""
+            SELECT 
+                d.name AS department_name,
+                c.status,
+                c.severity,
+                COUNT(*) AS case_count,
+                ROUND(AVG(c.priority_score), 2) AS avg_priority_score,
+                SUM(c.total_linked_reports) AS total_citizen_reports_represented
+            FROM repair_cases c
+            JOIN departments d ON c.department_id = d.department_id
+            GROUP BY d.name, c.status, c.severity
+            ORDER BY d.name, case_count DESC;
+        """)
+        rows = cur.fetchall()
+    return {"query_type": "MULTI_DIMENSIONAL_GROUP_BY", "count": len(rows), "aggregates": rows}
+
+@router.get("/queries/report-case-workorder-join")
+def get_report_case_workorder_join(limit: int = 10):
+    """
+    ⭐ DBMS MULTI-TABLE RELATIONAL JOIN HIGHLIGHT:
+    Expressive JOIN query showing a citizen report alongside its parent repair case,
+    managing department, and dispatched work order execution details.
+    """
+    with get_db_cursor() as cur:
+        cur.execute("""
+            SELECT 
+                r.report_id,
+                r.tracking_code,
+                r.category AS report_category,
+                r.severity AS report_severity,
+                r.status AS report_status,
+                r.address_text,
+                r.created_at AS reported_at,
+                c.case_id,
+                c.case_number,
+                c.title AS case_title,
+                c.status AS case_status,
+                c.priority_score,
+                d.name AS department_name,
+                w.work_order_id,
+                w.work_order_number,
+                w.assigned_team_leader,
+                w.contractor_name,
+                w.estimated_cost,
+                w.actual_cost,
+                w.cost_variance_pct,
+                w.status AS work_order_status
+            FROM citizen_reports r
+            JOIN repair_cases c ON r.case_id = c.case_id
+            JOIN departments d ON c.department_id = d.department_id
+            LEFT JOIN work_orders w ON c.case_id = w.case_id
+            ORDER BY r.report_id DESC
+            LIMIT %s;
+        """, (limit,))
+        rows = cur.fetchall()
+    return {"query_type": "MULTI_TABLE_JOIN", "count": len(rows), "records": rows}
+
+@router.get("/evaluation")
+def get_dbms_evaluation_concepts():
+    """
+    ⭐ DBMS EVALUATION CRITERIA:
+    Academic and architectural explanations of core DBMS concepts:
+    1. View vs. Stored Table
+    2. Automated Trigger Execution Mechanics
+    3. Stored Procedure vs. Application-Level Business Logic
+    """
+    return {
+        "view_vs_stored_table": {
+            "definition": "A stored table physically persists tuples in data files and index B-trees on disk; a view is a saved, named SELECT query representing a virtual table.",
+            "storage_and_memory": "Tables consume disk storage and InnoDB buffer pool pages. Standard views consume zero disk storage for data (only their query definition in information_schema.VIEWS), executing dynamically upon query invocation.",
+            "data_freshness": "Views always reflect the latest data modifications instantaneously without synchronization delay, eliminating stale cache inconsistencies.",
+            "security_and_abstraction": "Views allow granular column- and row-level access control, exposing aggregated or sanitized projections to specific roles (e.g., exposing open cases without revealing sensitive citizen PII)."
+        },
+        "why_triggers_execute_automatically": {
+            "definition": "Triggers are event-driven procedural database units bound to specific table DML events (BEFORE/AFTER INSERT, UPDATE, DELETE).",
+            "execution_kernel": "Triggers execute within the DBMS engine's internal transaction context, immediately before or after row modifications.",
+            "acid_boundary": "Because triggers execute inside the calling statement's transaction boundary, any trigger failure automatically rolls back the entire operation, guaranteeing database consistency.",
+            "unbypassable_enforcement": "Triggers execute regardless of how data is mutated — whether through API endpoints, manual DB console queries, background workers, or external services — providing centralized, authoritative governance."
+        },
+        "stored_procedure_vs_application_logic": {
+            "execution_location": "Stored procedures execute directly on the database engine tier (in-memory in MySQL), whereas application logic executes in Python/Node.js tiers.",
+            "network_round_trips": "Complex multi-step transactions in application logic require multiple network round-trips (SELECT -> Python -> UPDATE -> Python -> INSERT). Stored procedures bundle these into a single database network call, drastically reducing network latency.",
+            "precompilation_and_optimization": "The DBMS parses and generates an optimized query execution plan for stored procedures, whereas dynamic application queries may require runtime parsing.",
+            "centralized_rule_enforcement": "Stored procedures enforce critical business state machines (e.g., sp_transition_case_status) uniformly across multiple client applications (Web, Mobile, Admin Scripts) without rewriting validation in multiple programming languages."
+        }
+    }
+

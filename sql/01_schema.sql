@@ -19,7 +19,9 @@ CREATE TABLE IF NOT EXISTS departments (
     annual_budget DECIMAL(14, 2) NOT NULL DEFAULT 500000.00,
     spent_budget DECIMAL(14, 2) NOT NULL DEFAULT 0.00,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT chk_dept_annual_budget CHECK (annual_budget >= 0.00),
+    CONSTRAINT chk_dept_spent_budget CHECK (spent_budget >= 0.00)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ------------------------------------------------------------------------------
@@ -51,7 +53,11 @@ CREATE TABLE IF NOT EXISTS sensitive_locations (
     buffer_meters INT NOT NULL DEFAULT 350,
     weight_score INT NOT NULL DEFAULT 20,
     address VARCHAR(255) NOT NULL,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT chk_sens_lat CHECK (latitude BETWEEN -90.00000000 AND 90.00000000),
+    CONSTRAINT chk_sens_lng CHECK (longitude BETWEEN -180.00000000 AND 180.00000000),
+    CONSTRAINT chk_sens_buffer CHECK (buffer_meters > 0 AND buffer_meters <= 5000),
+    CONSTRAINT chk_sens_weight CHECK (weight_score BETWEEN 0 AND 100)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ------------------------------------------------------------------------------
@@ -79,7 +85,16 @@ CREATE TABLE IF NOT EXISTS infrastructure_assets (
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_assets_department FOREIGN KEY (department_id) 
-        REFERENCES departments(department_id) ON DELETE RESTRICT
+        REFERENCES departments(department_id) ON DELETE RESTRICT,
+    CONSTRAINT chk_asset_lat CHECK (latitude BETWEEN -90.00000000 AND 90.00000000),
+    CONSTRAINT chk_asset_lng CHECK (longitude BETWEEN -180.00000000 AND 180.00000000),
+    CONSTRAINT chk_asset_install_year CHECK (install_year BETWEEN 1900 AND 2100),
+    CONSTRAINT chk_asset_lifespan CHECK (expected_lifespan_years BETWEEN 1 AND 100),
+    CONSTRAINT chk_asset_health CHECK (current_health_score BETWEEN 0.00 AND 100.00),
+    CONSTRAINT chk_asset_incidents CHECK (total_incidents_count >= 0),
+    CONSTRAINT chk_asset_recurring CHECK (recurring_failures_count >= 0 AND recurring_failures_count <= total_incidents_count),
+    CONSTRAINT chk_asset_cumulative_cost CHECK (cumulative_repair_cost >= 0.00),
+    CONSTRAINT chk_asset_replacement_cost CHECK (replacement_cost_estimate >= 0.00)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ------------------------------------------------------------------------------
@@ -116,7 +131,13 @@ CREATE TABLE IF NOT EXISTS repair_cases (
     CONSTRAINT fk_cases_prev_case FOREIGN KEY (previous_case_id) 
         REFERENCES repair_cases(case_id) ON DELETE SET NULL,
     CONSTRAINT fk_cases_creator FOREIGN KEY (created_by_user_id) 
-        REFERENCES users(user_id) ON DELETE SET NULL
+        REFERENCES users(user_id) ON DELETE SET NULL,
+    CONSTRAINT chk_case_lat CHECK (latitude BETWEEN -90.00000000 AND 90.00000000),
+    CONSTRAINT chk_case_lng CHECK (longitude BETWEEN -180.00000000 AND 180.00000000),
+    CONSTRAINT chk_case_priority_score CHECK (priority_score BETWEEN 0.00 AND 100.00),
+    CONSTRAINT chk_case_total_reports CHECK (total_linked_reports >= 1),
+    CONSTRAINT chk_case_days_repair CHECK (days_since_last_repair IS NULL OR days_since_last_repair >= 0),
+    CONSTRAINT chk_case_closure_time CHECK (closed_at IS NULL OR closed_at >= created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ------------------------------------------------------------------------------
@@ -141,7 +162,10 @@ CREATE TABLE IF NOT EXISTS citizen_reports (
     CONSTRAINT fk_reports_user FOREIGN KEY (user_id) 
         REFERENCES users(user_id) ON DELETE RESTRICT,
     CONSTRAINT fk_reports_case FOREIGN KEY (case_id) 
-        REFERENCES repair_cases(case_id) ON DELETE CASCADE
+        REFERENCES repair_cases(case_id) ON DELETE RESTRICT,
+    CONSTRAINT chk_report_lat CHECK (latitude BETWEEN -90.00000000 AND 90.00000000),
+    CONSTRAINT chk_report_lng CHECK (longitude BETWEEN -180.00000000 AND 180.00000000),
+    CONSTRAINT chk_report_upvotes CHECK (upvotes_count >= 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ------------------------------------------------------------------------------
@@ -156,7 +180,12 @@ CREATE TABLE IF NOT EXISTS work_orders (
     contractor_name VARCHAR(150) NULL,
     estimated_cost DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
     actual_cost DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
-    cost_variance_pct DECIMAL(6, 2) NOT NULL DEFAULT 0.00,
+    cost_variance_pct DECIMAL(6, 2) GENERATED ALWAYS AS (
+        CASE 
+            WHEN estimated_cost > 0 THEN ROUND(((actual_cost - estimated_cost) / estimated_cost) * 100, 2)
+            ELSE 0.00 
+        END
+    ) STORED,
     target_completion_date DATETIME NOT NULL,
     actual_completion_date DATETIME NULL,
     materials_used TEXT NULL,
@@ -167,7 +196,10 @@ CREATE TABLE IF NOT EXISTS work_orders (
     CONSTRAINT fk_wo_case FOREIGN KEY (case_id) 
         REFERENCES repair_cases(case_id) ON DELETE RESTRICT,
     CONSTRAINT fk_wo_department FOREIGN KEY (department_id) 
-        REFERENCES departments(department_id) ON DELETE RESTRICT
+        REFERENCES departments(department_id) ON DELETE RESTRICT,
+    CONSTRAINT chk_wo_estimated_cost CHECK (estimated_cost >= 0.00),
+    CONSTRAINT chk_wo_actual_cost CHECK (actual_cost >= 0.00),
+    CONSTRAINT chk_wo_completion_date CHECK (actual_completion_date IS NULL OR actual_completion_date >= created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ------------------------------------------------------------------------------
@@ -176,7 +208,7 @@ CREATE TABLE IF NOT EXISTS work_orders (
 CREATE TABLE IF NOT EXISTS repair_inspections (
     inspection_id INT AUTO_INCREMENT PRIMARY KEY,
     case_id INT NOT NULL,
-    work_order_id INT NOT NULL,
+    work_order_id INT NOT NULL UNIQUE,
     inspector_user_id INT NOT NULL,
     before_photo_url VARCHAR(500) NOT NULL,
     after_photo_url VARCHAR(500) NULL,
@@ -192,7 +224,8 @@ CREATE TABLE IF NOT EXISTS repair_inspections (
     CONSTRAINT fk_insp_wo FOREIGN KEY (work_order_id) 
         REFERENCES work_orders(work_order_id) ON DELETE RESTRICT,
     CONSTRAINT fk_insp_user FOREIGN KEY (inspector_user_id) 
-        REFERENCES users(user_id) ON DELETE RESTRICT
+        REFERENCES users(user_id) ON DELETE RESTRICT,
+    CONSTRAINT chk_insp_rating CHECK (quality_rating BETWEEN 1 AND 5)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ------------------------------------------------------------------------------

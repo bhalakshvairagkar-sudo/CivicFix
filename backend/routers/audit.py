@@ -3,7 +3,7 @@ from typing import Optional
 import json
 
 from database import get_db_cursor
-from security import require_staff_or_admin
+from security import require_admin
 
 router = APIRouter(prefix="/api/audit-logs", tags=["Immutable Audit Trail"])
 
@@ -12,7 +12,7 @@ def list_audit_logs(
     action_type: Optional[str] = None,
     entity_type: Optional[str] = None,
     limit: int = Query(default=100, ge=10, le=500),
-    current_user: dict = Depends(require_staff_or_admin)
+    current_user: dict = Depends(require_admin)
 ):
     """
     Retrieves immutable audit trail records with actor name, state transition diffs, and timestamps.

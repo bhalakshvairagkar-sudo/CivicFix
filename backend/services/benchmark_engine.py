@@ -13,57 +13,58 @@ def run_performance_benchmark(query_type: str = "CATEGORY_STATUS", limit: int = 
         cur.execute("SELECT COUNT(*) AS total FROM benchmark_records;")
         total_rows = cur.fetchone()["total"]
 
+        safe_limit = max(1, min(int(limit), 10000))
+
         if query_type == "CATEGORY_STATUS":
             # 1. Unindexed / Scan-Forced Query:
             # Full table scan examining all rows without index
-            unindexed_sql = f"""
+            unindexed_sql = """
                 SELECT record_id, batch_code, asset_code, category, status, severity, repair_cost
                 FROM benchmark_records IGNORE INDEX (idx_bm_cat_stat)
                 WHERE notes LIKE '%urgent%' AND status = 'IN_PROGRESS'
-                LIMIT {limit};
+                LIMIT %s;
             """
 
             # 2. Indexed Query:
             # Using composite B-Tree index idx_bm_cat_stat (category, status)
-            indexed_sql = f"""
+            indexed_sql = """
                 SELECT record_id, batch_code, asset_code, category, status, severity, repair_cost
                 FROM benchmark_records FORCE INDEX (idx_bm_cat_stat)
                 WHERE category = 'POTHOLE' AND status = 'IN_PROGRESS'
-                LIMIT {limit};
+                LIMIT %s;
             """
 
         elif query_type == "ASSET_HISTORY":
-            unindexed_sql = f"""
+            unindexed_sql = """
                 SELECT record_id, asset_code, repair_cost, logged_date, notes
                 FROM benchmark_records IGNORE INDEX (idx_bm_asset_code)
                 WHERE notes LIKE '%urgent%' AND repair_cost > 500.00
-                LIMIT {limit};
+                LIMIT %s;
             """
-            indexed_sql = f"""
+            indexed_sql = """
                 SELECT record_id, asset_code, repair_cost, logged_date, notes
                 FROM benchmark_records FORCE INDEX (idx_bm_asset_code)
                 WHERE asset_code = 'AST-ROD-0101'
-                LIMIT {limit};
+                LIMIT %s;
             """
         else: # COST_AGGREGATION
-            unindexed_sql = f"""
+            unindexed_sql = """
                 SELECT batch_code, AVG(repair_cost) AS avg_cost, COUNT(*) AS cnt
                 FROM benchmark_records
                 GROUP BY batch_code
-                LIMIT {limit};
+                LIMIT %s;
             """
-            indexed_sql = f"""
+            indexed_sql = """
                 SELECT category, status, AVG(repair_cost) AS avg_cost, COUNT(*) AS cnt
                 FROM benchmark_records FORCE INDEX (idx_bm_cat_stat)
                 GROUP BY category, status
-                LIMIT {limit};
+                LIMIT %s;
             """
 
         # ----------------------------------------------------------------------
         # Measure Unindexed Query
         # ----------------------------------------------------------------------
-        # Get EXPLAIN
-        cur.execute(f"EXPLAIN FORMAT=TRADITIONAL {unindexed_sql}")
+        cur.execute(f"EXPLAIN FORMAT=TRADITIONAL {unindexed_sql}", (safe_limit,))
         unindexed_plan = cur.fetchall()
 
         # Execute 3 times and take average to eliminate one-off noise
@@ -71,7 +72,7 @@ def run_performance_benchmark(query_type: str = "CATEGORY_STATUS", limit: int = 
         unindexed_result_count = 0
         for _ in range(3):
             t0 = time.perf_counter()
-            cur.execute(unindexed_sql)
+            cur.execute(unindexed_sql, (safe_limit,))
             res = cur.fetchall()
             unindexed_result_count = len(res)
             unindexed_times.append((time.perf_counter() - t0) * 1000.0)
@@ -80,15 +81,14 @@ def run_performance_benchmark(query_type: str = "CATEGORY_STATUS", limit: int = 
         # ----------------------------------------------------------------------
         # Measure Indexed Query
         # ----------------------------------------------------------------------
-        # Get EXPLAIN
-        cur.execute(f"EXPLAIN FORMAT=TRADITIONAL {indexed_sql}")
+        cur.execute(f"EXPLAIN FORMAT=TRADITIONAL {indexed_sql}", (safe_limit,))
         indexed_plan = cur.fetchall()
 
         indexed_times = []
         indexed_result_count = 0
         for _ in range(3):
             t0 = time.perf_counter()
-            cur.execute(indexed_sql)
+            cur.execute(indexed_sql, (safe_limit,))
             res = cur.fetchall()
             indexed_result_count = len(res)
             indexed_times.append((time.perf_counter() - t0) * 1000.0)

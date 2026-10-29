@@ -83,8 +83,8 @@ def update_asset_health_metrics(asset_id: int, cur):
     """, (asset_id,))
     data = cur.fetchone()
 
-    total_incidents = data["total_incidents"] or 0
-    recurring_count = data["recurring_count"] or 0
+    total_incidents = int(data["total_incidents"] or 0)
+    recurring_count = int(data["recurring_count"] or 0)
     total_spent = float(data["total_spent"] or 0.0)
 
     # Health formula: 100 base - (7 per incident) - (12 per recurring failure)

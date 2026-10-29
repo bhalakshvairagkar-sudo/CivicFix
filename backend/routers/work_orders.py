@@ -64,8 +64,8 @@ def create_work_order(
     wo_number = f"WO-{datetime.now().year}-{uuid.uuid4().hex[:6].upper()}"
 
     with transaction_cursor() as cur:
-        # Validate case
-        cur.execute("SELECT case_id, case_number, status, department_id FROM repair_cases WHERE case_id = %s", (payload.case_id,))
+        # Validate and row-lock case
+        cur.execute("SELECT case_id, case_number, status, department_id FROM repair_cases WHERE case_id = %s FOR UPDATE", (payload.case_id,))
         case = cur.fetchone()
         if not case:
             raise HTTPException(status_code=404, detail="Case not found.")
@@ -145,6 +145,7 @@ def update_work_order(
             FROM work_orders w
             JOIN repair_cases c ON w.case_id = c.case_id
             WHERE w.work_order_id = %s
+            FOR UPDATE
         """, (work_order_id,))
         wo = cur.fetchone()
 
@@ -167,8 +168,6 @@ def update_work_order(
         if payload.actual_cost is not None:
             fields.append("actual_cost = %s")
             vals.append(new_actual)
-            fields.append("cost_variance_pct = %s")
-            vals.append(cost_analysis["variance_pct"])
         if payload.materials_used is not None:
             fields.append("materials_used = %s")
             vals.append(payload.materials_used)
