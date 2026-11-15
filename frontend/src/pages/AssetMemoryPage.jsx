@@ -215,7 +215,7 @@ export default function AssetMemoryPage() {
                       </td>
 
                       <td className="py-3.5 px-4 font-mono text-slate-200 whitespace-nowrap">
-                        ${Number(a.cumulative_repair_cost || 0).toLocaleString()}
+                        ₹{Number(a.cumulative_repair_cost || 0).toLocaleString('en-IN')}
                       </td>
 
                       {/* Overhaul Ratio Badge */}
@@ -294,13 +294,13 @@ export default function AssetMemoryPage() {
                 <div>
                   <span className="text-slate-400">Total Spent</span>
                   <div className="font-semibold text-amber-400 font-mono mt-0.5">
-                    ${Number(selectedAssetTimeline.asset.cumulative_repair_cost || 0).toLocaleString()}
+                    ₹{Number(selectedAssetTimeline.asset.cumulative_repair_cost || 0).toLocaleString('en-IN')}
                   </div>
                 </div>
                 <div>
                   <span className="text-slate-400">Replacement Cost</span>
                   <div className="font-semibold text-slate-300 font-mono mt-0.5">
-                    ${Number(selectedAssetTimeline.asset.replacement_cost_estimate || 0).toLocaleString()}
+                    ₹{Number(selectedAssetTimeline.asset.replacement_cost_estimate || 0).toLocaleString('en-IN')}
                   </div>
                 </div>
               </div>
@@ -325,7 +325,7 @@ export default function AssetMemoryPage() {
                       <div className="flex items-center gap-3 text-[11px] text-slate-400">
                         <span>Status: <b className="text-slate-200">{item.status}</b></span>
                         {item.contractor_name && <span>Contractor: {item.contractor_name}</span>}
-                        {item.actual_cost && <span className="font-mono text-emerald-400">${Number(item.actual_cost).toLocaleString()}</span>}
+                        {item.actual_cost && <span className="font-mono text-emerald-400">₹{Number(item.actual_cost).toLocaleString('en-IN')}</span>}
                       </div>
                     </div>
                   ))}

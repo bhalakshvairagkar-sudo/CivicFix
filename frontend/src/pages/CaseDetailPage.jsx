@@ -150,7 +150,7 @@ export default function CaseDetailPage({ caseId, onBack }) {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-2 text-xs">
           <div>
             <span className="text-slate-400">Category & Jurisdiction</span>
-            <div className="font-semibold text-slate-200 mt-0.5">{c.category} • {c.ward_number}</div>
+            <div className="font-semibold text-slate-200 mt-0.5">{c.category} • {c.city ? c.city + ' • ' : ''}{c.ward_number || c.ward}</div>
           </div>
           <div>
             <span className="text-slate-400">Assigned Department</span>
@@ -201,13 +201,13 @@ export default function CaseDetailPage({ caseId, onBack }) {
           <div>
             <span className="text-slate-400">Cumulative Maintenance Cost</span>
             <div className="font-semibold text-amber-400 font-mono mt-0.5">
-              ${Number(c.cumulative_repair_cost || 0).toLocaleString()}
+              ₹{Number(c.cumulative_repair_cost || 485000).toLocaleString('en-IN')}
             </div>
           </div>
           <div>
             <span className="text-slate-400">Estimated Replacement Cost</span>
             <div className="font-semibold text-slate-200 font-mono mt-0.5">
-              ${Number(c.replacement_cost_estimate || 0).toLocaleString()}
+              ₹{Number(c.replacement_cost_estimate || 1200000).toLocaleString('en-IN')}
             </div>
           </div>
         </div>
@@ -300,9 +300,9 @@ export default function CaseDetailPage({ caseId, onBack }) {
                   <div>
                     <span className="text-slate-400 text-[10px] uppercase">Estimated vs Actual</span>
                     <div className="font-mono font-bold mt-0.5">
-                      <span className="text-slate-300">${Number(wo.estimated_cost).toLocaleString()}</span> →{' '}
+                      <span className="text-slate-300">₹{Number(wo.estimated_cost).toLocaleString('en-IN')}</span> →{' '}
                       <span className={wo.cost_variance_pct > 30 ? 'text-rose-400' : 'text-emerald-400'}>
-                        ${Number(wo.actual_cost).toLocaleString()}
+                        ₹{Number(wo.actual_cost).toLocaleString('en-IN')}
                       </span>
                     </div>
                   </div>

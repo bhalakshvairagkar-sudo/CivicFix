@@ -152,11 +152,11 @@ export default function WorkOrdersPage({ onSelectCase }) {
                       </td>
 
                       <td className="py-3.5 px-4 font-mono text-slate-300 whitespace-nowrap">
-                        ${Number(wo.estimated_cost).toLocaleString()}
+                        ₹{Number(wo.estimated_cost).toLocaleString('en-IN')}
                       </td>
 
                       <td className="py-3.5 px-4 font-mono text-white font-bold whitespace-nowrap">
-                        ${Number(wo.actual_cost).toLocaleString()}
+                        ₹{Number(wo.actual_cost).toLocaleString('en-IN')}
                       </td>
 
                       <td className="py-3.5 px-4 whitespace-nowrap">

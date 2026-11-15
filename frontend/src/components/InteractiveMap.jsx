@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
-
-const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'AIzaSyBIAiue876R42ADE8dDATi24sk0qaARayc';
+import { Compass, Maximize2 } from 'lucide-react';
 
 // Configured Map Tile Providers
 const MAP_PROVIDERS = {
@@ -9,25 +8,25 @@ const MAP_PROVIDERS = {
     id: 'google_roadmap',
     name: 'Google Maps',
     icon: '🗺️',
-    url: `https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&key=${GOOGLE_API_KEY}`,
+    url: 'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
     attribution: '© Google Maps',
     maxZoom: 20,
     subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
   },
   google_satellite: {
     id: 'google_satellite',
-    name: 'Google Satellite',
+    name: 'Satellite',
     icon: '🛰️',
-    url: `https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&key=${GOOGLE_API_KEY}`,
+    url: 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
     attribution: '© Google Maps Satellite',
     maxZoom: 20,
     subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
   },
   google_terrain: {
     id: 'google_terrain',
-    name: 'Google Terrain',
+    name: 'Terrain',
     icon: '⛰️',
-    url: `https://mt1.google.com/vt/lyrs=p&x={x}&y={y}&z={z}&key=${GOOGLE_API_KEY}`,
+    url: 'https://mt1.google.com/vt/lyrs=p&x={x}&y={y}&z={z}',
     attribution: '© Google Maps Terrain',
     maxZoom: 20,
     subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
@@ -65,7 +64,7 @@ export default function InteractiveMap({
   const markersLayerRef = useRef(null);
   const sensitiveLayerRef = useRef(null);
 
-  // Active Map Tile Provider (default to Google Maps)
+  // Active Map Tile Provider
   const [activeLayerKey, setActiveLayerKey] = useState('google_roadmap');
 
   // Initialize Map
@@ -73,10 +72,10 @@ export default function InteractiveMap({
     if (!mapContainerRef.current) return;
 
     if (!mapInstanceRef.current) {
-      // Default center: Metro Civic District (Lat: 12.9716, Lng: 77.5946)
+      // Default center: India / Bengaluru Municipal Hub (Lat: 12.9716, Lng: 77.5946)
       const map = L.map(mapContainerRef.current, {
         center: [12.9716, 77.5946],
-        zoom: 14,
+        zoom: 12,
         zoomControl: true,
         attributionControl: false
       });
@@ -97,7 +96,6 @@ export default function InteractiveMap({
     }
 
     return () => {
-      // Cleanup on unmount
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
@@ -137,16 +135,16 @@ export default function InteractiveMap({
     markersLayerRef.current.clearLayers();
     sensitiveLayerRef.current.clearLayers();
 
-    // 1. Draw Sensitive Locations (Hospitals, Schools) Buffer Circles
+    // 1. Draw Sensitive Locations (Hospitals, Schools, Transit Hubs) Buffer Circles in India
     sensitiveLocations.forEach((loc) => {
       const isHospital = loc.type === 'HOSPITAL';
       const isSchool = loc.type === 'SCHOOL';
-      const color = isHospital ? '#ef4444' : isSchool ? '#f59e0b' : '#3b82f6';
+      const color = isHospital ? '#ef4444' : isSchool ? '#f59e0b' : '#06b6d4';
 
       const circle = L.circle([parseFloat(loc.latitude), parseFloat(loc.longitude)], {
         color: color,
         fillColor: color,
-        fillOpacity: 0.16,
+        fillOpacity: 0.15,
         weight: 2,
         radius: loc.buffer_meters || 350
       });
@@ -157,7 +155,7 @@ export default function InteractiveMap({
       sensitiveLayerRef.current.addLayer(circle);
     });
 
-    // 2. Draw Case Markers
+    // 2. Draw Case Markers across India
     const bounds = [];
 
     cases.forEach((c) => {
@@ -172,41 +170,50 @@ export default function InteractiveMap({
       const isClosed = c.status === 'VERIFIED_CLOSED' || c.status === 'RESOLVED';
       const isRecurring = Boolean(c.is_recurring_failure);
 
-      let pinColor = '#10b981'; // Green
-      if (isClosed) pinColor = '#3b82f6'; // Blue
-      else if (isCritical) pinColor = '#ef4444'; // Red
-      else if (c.priority_level === 'HIGH') pinColor = '#f97316'; // Orange
-      else if (c.priority_level === 'MEDIUM') pinColor = '#eab308'; // Yellow
+      let pinColor = '#10b981'; // Green (Normal)
+      if (isClosed) pinColor = '#3b82f6'; // Blue (Closed)
+      else if (isCritical) pinColor = '#ef4444'; // Red (Critical)
+      else if (c.priority_level === 'HIGH') pinColor = '#f97316'; // Orange (High)
+      else if (c.priority_level === 'MEDIUM') pinColor = '#eab308'; // Yellow (Medium)
 
-      // Custom SVG Pin Icon
+      // Custom SVG Pin Icon with glow and recurrence ring
       const iconHtml = `
         <div style="
           position: relative;
-          width: 32px;
-          height: 32px;
+          width: 34px;
+          height: 34px;
           display: flex;
           align-items: center;
           justify-content: center;
           cursor: pointer;
-          transform: ${isSelected ? 'scale(1.3)' : 'scale(1)'};
+          transform: ${isSelected ? 'scale(1.35)' : 'scale(1)'};
           transition: transform 0.2s ease;
         ">
           ${isRecurring ? `
             <div style="
               position: absolute;
-              inset: -4px;
+              inset: -5px;
               border-radius: 9999px;
               border: 2.5px dashed #a855f7;
-              animation: spin 6s linear infinite;
+              animation: spin 5s linear infinite;
+            "></div>
+          ` : ''}
+          ${isCritical && !isClosed ? `
+            <div style="
+              position: absolute;
+              inset: -4px;
+              border-radius: 9999px;
+              background: rgba(239, 68, 68, 0.35);
+              animation: pulse 1.8s ease-in-out infinite;
             "></div>
           ` : ''}
           <div style="
-            width: 26px;
-            height: 26px;
+            width: 28px;
+            height: 28px;
             border-radius: 9999px;
             background: ${pinColor};
             border: 2.5px solid #ffffff;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.6);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -222,36 +229,53 @@ export default function InteractiveMap({
       const customIcon = L.divIcon({
         className: 'custom-leaflet-marker',
         html: iconHtml,
-        iconSize: [32, 32],
-        iconAnchor: [16, 16],
+        iconSize: [34, 34],
+        iconAnchor: [17, 17],
         popupAnchor: [0, -18]
       });
 
       const marker = L.marker([lat, lng], { icon: customIcon });
 
+      const cityWardLabel = [c.city, c.ward_number || c.ward].filter(Boolean).join(' • ');
+
       const popupHtml = `
-        <div style="font-family: 'Plus Jakarta Sans', sans-serif; padding: 2px; width: 230px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-            <span style="font-size: 10px; font-weight: bold; color: #10b981; font-family: monospace;">#${c.case_number}</span>
-            <span style="font-size: 10px; padding: 2px 6px; border-radius: 4px; background: rgba(0,0,0,0.4); color: #cbd5e1; font-weight: 500;">${c.category}</span>
+        <div style="font-family: 'Plus Jakarta Sans', sans-serif; padding: 4px; width: 250px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <span style="font-size: 11px; font-weight: 800; color: #10b981; font-family: monospace;">#${c.case_number}</span>
+            <span style="font-size: 10px; padding: 2px 7px; border-radius: 6px; background: rgba(255,255,255,0.08); color: #94a3b8; font-weight: 600;">${c.category}</span>
           </div>
-          <h4 style="font-size: 13px; font-weight: 700; color: #0f172a; margin: 0 0 6px 0; line-height: 1.3;">${c.title}</h4>
-          <div style="font-size: 11px; color: #475569; margin-bottom: 8px;">
-            Status: <b style="color: #0f172a;">${c.status}</b><br/>
-            Priority: <b style="color: ${pinColor}; font-weight: 700;">${c.priority_level} (${c.priority_score || 'N/A'})</b>
-            ${isRecurring ? '<br/><span style="color: #7e22ce; font-weight: bold;">⚠️ Recurring Defect</span>' : ''}
+
+          ${cityWardLabel ? `
+            <div style="font-size: 10px; font-weight: 700; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">
+              📍 ${cityWardLabel}
+            </div>
+          ` : ''}
+
+          <h4 style="font-size: 13px; font-weight: 700; color: #f8fafc; margin: 0 0 6px 0; line-height: 1.35;">${c.title}</h4>
+
+          ${c.address_text ? `
+            <div style="font-size: 11px; color: #94a3b8; margin-bottom: 6px; line-height: 1.3;">
+              ${c.address_text}
+            </div>
+          ` : ''}
+
+          <div style="font-size: 11px; color: #cbd5e1; margin-bottom: 10px; padding: 6px; background: rgba(0,0,0,0.25); border-radius: 8px;">
+            Status: <b style="color: #f1f5f9;">${c.status}</b><br/>
+            Priority: <b style="color: ${pinColor}; font-weight: 800;">${c.priority_level} (${c.priority_score || 'N/A'} pts)</b>
+            ${isRecurring ? '<br/><span style="color: #c084fc; font-weight: 700;">⚠️ Verified Recurring Failure</span>' : ''}
           </div>
+
           <button id="btn-inspect-${c.case_id}" style="
             width: 100%;
-            padding: 6px 0;
-            background: #10b981;
+            padding: 7px 0;
+            background: linear-gradient(to right, #059669, #10b981);
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             font-size: 11px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
-            box-shadow: 0 2px 4px rgba(16,185,129,0.3);
+            box-shadow: 0 2px 6px rgba(16,185,129,0.35);
           ">
             Inspect Repair Case →
           </button>
@@ -276,7 +300,7 @@ export default function InteractiveMap({
 
     // Auto-fit bounds if markers exist
     if (bounds.length > 0 && !selectedCaseId) {
-      map.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 });
+      map.fitBounds(bounds, { padding: [45, 45], maxZoom: 15 });
     } else if (selectedCaseId) {
       const selectedCase = cases.find((c) => c.case_id === selectedCaseId);
       if (selectedCase) {
@@ -285,16 +309,27 @@ export default function InteractiveMap({
     }
   }, [cases, sensitiveLocations, selectedCaseId, onCaseSelect]);
 
+  const handleResetBounds = () => {
+    const map = mapInstanceRef.current;
+    if (!map || cases.length === 0) return;
+    const bounds = cases
+      .map((c) => [parseFloat(c.latitude), parseFloat(c.longitude)])
+      .filter(([lat, lng]) => !isNaN(lat) && !isNaN(lng));
+    if (bounds.length > 0) {
+      map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
+    }
+  };
+
   return (
-    <div className="relative w-full overflow-hidden rounded-2xl border border-slate-800 shadow-xl" style={{ height }}>
+    <div className="relative w-full overflow-hidden rounded-2xl border border-slate-800 shadow-2xl" style={{ height }}>
       {/* Map Container */}
       <div ref={mapContainerRef} className="w-full h-full" />
 
-      {/* Google Maps Layer Selector Controls */}
+      {/* Top Map Layer Selector Controls */}
       <div className="absolute top-3 right-3 z-[1000] flex items-center gap-1.5 p-1 rounded-xl bg-slate-900/90 backdrop-blur-md border border-slate-700/80 shadow-2xl">
-        <div className="flex items-center gap-1 px-2 py-1 text-[11px] font-semibold text-emerald-400 border-r border-slate-700/80 mr-0.5">
+        <div className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold text-emerald-400 border-r border-slate-700/80 mr-0.5">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span>Google Maps API</span>
+          <span>India Civic Grid</span>
         </div>
 
         {Object.values(MAP_PROVIDERS).map((provider) => {
@@ -315,33 +350,42 @@ export default function InteractiveMap({
             </button>
           );
         })}
+
+        <button
+          onClick={handleResetBounds}
+          className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium text-cyan-300 hover:bg-cyan-500/10 border border-cyan-500/30 transition-all ml-1"
+          title="Fit All Markers across India"
+        >
+          <Maximize2 className="w-3.5 h-3.5" />
+          <span className="hidden md:inline">Fit India</span>
+        </button>
       </div>
 
       {/* Legend Overlay */}
       <div className="absolute bottom-4 right-4 z-[1000] glass-card p-3 rounded-xl shadow-lg border border-slate-700/60 text-[11px] space-y-1.5 pointer-events-auto">
         <div className="font-semibold text-slate-200 uppercase tracking-wider text-[10px] pb-1 border-b border-slate-700 flex items-center justify-between">
-          <span>Map Priority Legend</span>
+          <span>Priority Scoring Legend</span>
           <span className="text-[9px] font-mono text-emerald-400">Live</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
-          <span className="text-slate-300">Critical Priority</span>
+          <span className="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-sm shadow-rose-500/50"></span>
+          <span className="text-slate-300">Critical Hazard (Score ≥ 80)</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-          <span className="text-slate-300">High Priority</span>
+          <span className="text-slate-300">High Urgency (Score 60-79)</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full bg-yellow-400"></span>
-          <span className="text-slate-300">Medium Priority</span>
+          <span className="text-slate-300">Medium Urgency (Score 40-59)</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
-          <span className="text-slate-300">Verified Closed</span>
+          <span className="text-slate-300">Verified Closed / Repaired</span>
         </div>
         <div className="flex items-center gap-2 pt-1 border-t border-slate-700/60">
           <span className="w-3.5 h-3.5 rounded-full border-2 border-dashed border-purple-400"></span>
-          <span className="text-purple-300 font-medium">Recurring Failure</span>
+          <span className="text-purple-300 font-medium">Recurring Failure Audit Flag</span>
         </div>
       </div>
     </div>

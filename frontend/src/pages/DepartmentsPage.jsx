@@ -75,7 +75,7 @@ export default function DepartmentsPage() {
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-slate-400">Annual Budget Allocation</span>
                   <span className="font-mono text-slate-200 font-bold">
-                    ${Number(dept.spent_budget || 0).toLocaleString()} / ${Number(dept.annual_budget || 0).toLocaleString()}
+                    ₹{(Number(dept.spent_budget || 0) / 100000).toFixed(1)}L / ₹{(Number(dept.annual_budget || 0) / 100000).toFixed(1)}L
                   </span>
                 </div>
                 <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
@@ -88,7 +88,7 @@ export default function DepartmentsPage() {
                 </div>
                 <div className="flex items-center justify-between text-[11px] text-slate-500">
                   <span>{budgetPct}% Utilized</span>
-                  <span>Remaining: ${(Number(dept.annual_budget || 0) - Number(dept.spent_budget || 0)).toLocaleString()}</span>
+                  <span>Remaining: ₹{((Number(dept.annual_budget || 0) - Number(dept.spent_budget || 0)) / 100000).toFixed(1)} Lakhs</span>
                 </div>
               </div>
 

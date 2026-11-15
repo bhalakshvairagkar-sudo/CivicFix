@@ -28,7 +28,7 @@ export default function Navbar({ onOpenReportModal }) {
             </span>
           </div>
           <p className="text-[11px] text-slate-400 font-medium hidden sm:block">
-            Intelligent Infrastructure Monitoring & Repair System
+            National Municipal Infrastructure & Repair Intelligence (India Division)
           </p>
         </div>
       </div>
