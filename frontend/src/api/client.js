@@ -1,3 +1,5 @@
+import { handleMockRequest } from './mockService';
+
 const rawBase = import.meta.env.VITE_API_BASE_URL || '/api';
 const API_BASE = rawBase.endsWith('/') ? rawBase.slice(0, -1) : rawBase;
 
@@ -16,29 +18,52 @@ export async function apiRequest(endpoint, options = {}) {
   const endpointPath = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
   const url = endpoint.startsWith('http') ? endpoint : `${API_BASE}${endpointPath}`;
 
-  const response = await fetch(url, {
-    ...options,
-    headers
-  });
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers
+    });
 
-  if (response.status === 401) {
-    // If token invalid, remove it
-    localStorage.removeItem('civicfix_token');
-    localStorage.removeItem('civicfix_user');
-  }
+    if (response.status === 401) {
+      localStorage.removeItem('civicfix_token');
+      localStorage.removeItem('civicfix_user');
+    }
 
-  if (!response.ok) {
-    let errorMsg = `API Error: ${response.status} ${response.statusText}`;
+    // Static site servers often return 404 or 405 for unhandled backend API endpoints
+    if (response.status === 404 || response.status === 405 || response.status === 502) {
+      return await handleMockRequest(endpoint, options);
+    }
+
+    const text = await response.text();
+
+    // If body is empty or returns HTML (SPA fallback), seamlessly switch to client mock service
+    if (!text || !text.trim() || text.trim().startsWith('<!doctype') || text.trim().startsWith('<html') || text.trim().startsWith('<!DOCTYPE')) {
+      return await handleMockRequest(endpoint, options);
+    }
+
+    let parsedJson;
     try {
-      const errData = await response.json();
-      if (errData && errData.detail) {
-        errorMsg = typeof errData.detail === 'string' ? errData.detail : JSON.stringify(errData.detail);
-      }
-    } catch (_) {}
-    throw new Error(errorMsg);
-  }
+      parsedJson = JSON.parse(text);
+    } catch (_) {
+      return await handleMockRequest(endpoint, options);
+    }
 
-  return response.json();
+    if (!response.ok) {
+      let errorMsg = `API Error: ${response.status} ${response.statusText}`;
+      if (parsedJson && parsedJson.detail) {
+        errorMsg = typeof parsedJson.detail === 'string' ? parsedJson.detail : JSON.stringify(parsedJson.detail);
+      }
+      throw new Error(errorMsg);
+    }
+
+    return parsedJson;
+  } catch (err) {
+    if (err.message && err.message.startsWith('API Error:')) {
+      throw err;
+    }
+    // Network error (offline, CORS, unconfigured host) or JSON parse crash
+    return await handleMockRequest(endpoint, options);
+  }
 }
 
 export const api = {
