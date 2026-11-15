@@ -3,6 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "npm --prefix frontend install && npm --prefix frontend run build && node -e \"const fs=require('fs'); try { fs.cpSync('frontend/dist', 'dist', {recursive:true}); } catch(_) {}\""
+    "build": "npm --prefix frontend install && npm --prefix frontend run build && node -e \"const fs=require('fs'); try { fs.cpSync('frontend/dist', 'dist', {recursive:true}); } catch(_) {}; try { fs.cpSync('frontend/dist', 'frontend/public/dist', {recursive:true}); } catch(_) {}\""
   }
 }

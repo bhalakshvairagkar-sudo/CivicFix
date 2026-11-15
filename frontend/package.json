@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node -e \"const fs=require('fs'); try { fs.cpSync('dist', '../dist', {recursive:true}); } catch(_) {}\"",
+    "build": "node -e \"const fs=require('fs'); try { fs.rmSync('public/dist', {recursive:true, force:true}); } catch(_) {}\" && vite build && node -e \"const fs=require('fs'); try { fs.cpSync('dist', '../dist', {recursive:true}); } catch(_) {}; try { fs.cpSync('dist', 'public/dist', {recursive:true}); } catch(_) {}\"",
     "preview": "vite preview"
   },
   "dependencies": {
