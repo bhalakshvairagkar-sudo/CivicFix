@@ -29,7 +29,7 @@ PHOTO_POTHOLE = "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=
 PHOTO_POTHOLE_REPAIRED = "https://images.unsplash.com/photo-1578991624414-276ef23a534f?w=600&auto=format&fit=crop&q=80"
 PHOTO_STREETLIGHT = "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?w=600&auto=format&fit=crop&q=80"
 PHOTO_STREETLIGHT_FIXED = "https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=600&auto=format&fit=crop&q=80"
-PHOTO_DRAINAGE = "https://images.unsplash.com/photo-1541888946425-d0fbb180c5f7?w=600&auto=format&fit=crop&q=80"
+PHOTO_DRAINAGE = "https://images.unsplash.com/photo-1547683905-f686c993aae5?w=600&auto=format&fit=crop&q=80"
 PHOTO_DRAIN_FIXED = "https://images.unsplash.com/photo-1584467735871-8e85353a8413?w=600&auto=format&fit=crop&q=80"
 PHOTO_FOOTPATH = "https://images.unsplash.com/photo-1590674899484-d5640e854abe?w=600&auto=format&fit=crop&q=80"
 PHOTO_FOOTPATH_FIXED = "https://images.unsplash.com/photo-1506157786151-b8491531f063?w=600&auto=format&fit=crop&q=80"

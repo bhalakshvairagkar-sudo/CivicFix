@@ -251,6 +251,12 @@ export default function InteractiveMap({
             </div>
           ` : ''}
 
+          ${c.photo_url ? `
+            <div style="width: 100%; height: 110px; border-radius: 8px; overflow: hidden; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.12); background: #0f172a;">
+              <img src="${c.photo_url}" alt="${c.title}" style="width: 100%; height: 110px; object-fit: cover; display: block;" onerror="this.parentElement.style.display='none'" />
+            </div>
+          ` : ''}
+
           <h4 style="font-size: 13px; font-weight: 700; color: #f8fafc; margin: 0 0 6px 0; line-height: 1.35;">${c.title}</h4>
 
           ${c.address_text ? `

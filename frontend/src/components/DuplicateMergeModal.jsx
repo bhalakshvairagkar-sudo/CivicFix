@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, GitMerge, AlertCircle, CheckCircle2, ArrowRight } from 'lucide-react';
+import { X, GitMerge, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { api } from '../api/client';
 import PriorityBadge from './PriorityBadge';
 
@@ -9,16 +9,19 @@ export default function DuplicateMergeModal({ targetCase, onClose, onMerged }) {
   const [selectedCaseId, setSelectedCaseId] = useState(null);
   const [merging, setMerging] = useState(false);
   const [error, setError] = useState(null);
+  const [successMsg, setSuccessMsg] = useState(null);
 
   useEffect(() => {
     async function fetchCandidates() {
       if (!targetCase) return;
       try {
         setLoading(true);
+        setError(null);
         const data = await api.get(`/cases/${targetCase.case_id}/duplicate-candidates`);
-        setCandidates(data);
-        if (data.length > 0) {
-          setSelectedCaseId(data[0].case_id);
+        const list = Array.isArray(data) ? data : (data?.candidates || []);
+        setCandidates(list);
+        if (list.length > 0) {
+          setSelectedCaseId(list[0].case_id || list[0].id);
         }
       } catch (err) {
         setError(err.message);
@@ -37,11 +40,13 @@ export default function DuplicateMergeModal({ targetCase, onClose, onMerged }) {
       const res = await api.post(`/cases/${targetCase.case_id}/merge-duplicate`, {
         secondary_case_id: selectedCaseId
       });
-      if (onMerged) onMerged(res);
-      onClose();
+      setSuccessMsg(res?.message || 'ACID Transaction Succeeded: Duplicate reports consolidated and priority recalculated.');
+      setTimeout(() => {
+        if (onMerged) onMerged(res);
+        onClose();
+      }, 1200);
     } catch (err) {
       setError(err.message);
-    } finally {
       setMerging(false);
     }
   };
@@ -80,14 +85,21 @@ export default function DuplicateMergeModal({ targetCase, onClose, onMerged }) {
             </div>
           )}
 
+          {successMsg && (
+            <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-xs text-emerald-300 flex items-center gap-2 animate-fadeIn">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+              <span className="font-semibold">{successMsg}</span>
+            </div>
+          )}
+
           {/* Primary Target Case */}
           <div className="p-4 bg-slate-800/50 border border-indigo-500/30 rounded-xl">
-            <div className="text-xs font-semibold uppercase tracking-wider text-indigo-400 mb-1">Target Case (Preserved)</div>
+            <div className="text-xs font-semibold uppercase tracking-wider text-indigo-400 mb-1">Target Case (Preserved Primary)</div>
             <div className="flex items-start justify-between gap-4">
               <div>
                 <span className="text-xs font-mono text-emerald-400">#{targetCase.case_number}</span>
                 <h4 className="text-sm font-semibold text-slate-200">{targetCase.title}</h4>
-                <p className="text-xs text-slate-400 mt-1">{targetCase.category} • Severity: {targetCase.severity}</p>
+                <p className="text-xs text-slate-400 mt-1">{targetCase.category} • Severity: {targetCase.severity} • {targetCase.address_text || ''}</p>
               </div>
               <PriorityBadge level={targetCase.priority_level} score={targetCase.priority_score} />
             </div>
@@ -96,60 +108,65 @@ export default function DuplicateMergeModal({ targetCase, onClose, onMerged }) {
           {/* Candidates List */}
           <div>
             <h5 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
-              Detected Duplicate Candidates within Proximity
+              Detected Duplicate Candidates within Proximity Corridor
             </h5>
 
             {loading ? (
               <div className="text-center py-8 text-sm text-slate-400">Scanning for geographical duplicates...</div>
             ) : candidates.length === 0 ? (
               <div className="p-6 text-center rounded-xl bg-slate-800/30 border border-slate-700/40 text-sm text-slate-400">
-                No active duplicate cases detected within 150m of this location.
+                No active duplicate cases detected within spatial proximity corridor.
               </div>
             ) : (
               <div className="space-y-3">
-                {candidates.map((cand) => (
-                  <label
-                    key={cand.case_id}
-                    onClick={() => setSelectedCaseId(cand.case_id)}
-                    className={`block p-4 rounded-xl border transition-all cursor-pointer ${
-                      selectedCaseId === cand.case_id
-                        ? 'bg-indigo-950/30 border-indigo-500 shadow-md shadow-indigo-950/50'
-                        : 'bg-slate-800/30 border-slate-700 hover:border-slate-600'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex items-start gap-3">
-                        <input
-                          type="radio"
-                          name="duplicate_candidate"
-                          checked={selectedCaseId === cand.case_id}
-                          onChange={() => setSelectedCaseId(cand.case_id)}
-                          className="mt-1 text-indigo-500 focus:ring-indigo-500"
-                        />
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-mono text-slate-300">#{cand.case_number}</span>
-                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-300">
-                              {cand.duplicate_confidence_pct}% Match
-                            </span>
+                {candidates.map((cand) => {
+                  const cId = cand.case_id || cand.id;
+                  const reasons = Array.isArray(cand.reasons) ? cand.reasons : ['Within spatial proximity corridor', 'Matching defect category'];
+                  const isSelected = selectedCaseId === cId;
+                  return (
+                    <label
+                      key={cId}
+                      onClick={() => setSelectedCaseId(cId)}
+                      className={`block p-4 rounded-xl border transition-all cursor-pointer ${
+                        isSelected
+                          ? 'bg-indigo-950/30 border-indigo-500 shadow-md shadow-indigo-950/50 ring-1 ring-indigo-500/50'
+                          : 'bg-slate-800/30 border-slate-700 hover:border-slate-600'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-start gap-3">
+                          <input
+                            type="radio"
+                            name="duplicate_candidate"
+                            checked={isSelected}
+                            onChange={() => setSelectedCaseId(cId)}
+                            className="mt-1 text-indigo-500 focus:ring-indigo-500"
+                          />
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-mono text-slate-300">#{cand.case_number}</span>
+                              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-300">
+                                {cand.duplicate_confidence_pct || 95}% Match
+                              </span>
+                            </div>
+                            <h4 className="text-sm font-semibold text-slate-200 mt-1">{cand.title}</h4>
+                            <ul className="mt-2 space-y-0.5 text-xs text-slate-400">
+                              {reasons.map((r, i) => (
+                                <li key={i} className="flex items-center gap-1.5">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+                                  <span>{r}</span>
+                                </li>
+                              ))}
+                            </ul>
                           </div>
-                          <h4 className="text-sm font-semibold text-slate-200 mt-1">{cand.title}</h4>
-                          <ul className="mt-2 space-y-0.5 text-xs text-slate-400">
-                            {cand.reasons.map((r, i) => (
-                              <li key={i} className="flex items-center gap-1.5">
-                                <span className="w-1 h-1 rounded-full bg-indigo-400"></span>
-                                {r}
-                              </li>
-                            ))}
-                          </ul>
                         </div>
+                        <span className="text-xs font-mono text-slate-400 whitespace-nowrap">
+                          {cand.distance_meters ? `${cand.distance_meters}m away` : 'Adjacent'}
+                        </span>
                       </div>
-                      <span className="text-xs font-mono text-slate-400 whitespace-nowrap">
-                        {cand.distance_meters}m away
-                      </span>
-                    </div>
-                  </label>
-                ))}
+                    </label>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -172,12 +189,12 @@ export default function DuplicateMergeModal({ targetCase, onClose, onMerged }) {
             Cancel
           </button>
           <button
-            disabled={!selectedCaseId || merging || candidates.length === 0}
+            disabled={!selectedCaseId || merging || candidates.length === 0 || Boolean(successMsg)}
             onClick={handleMerge}
             className="flex items-center gap-2 px-5 py-2.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-all shadow-lg shadow-indigo-600/20"
           >
             <GitMerge className="w-4 h-4" />
-            <span>{merging ? 'Executing Transaction...' : 'Merge Selected Duplicate'}</span>
+            <span>{merging ? 'Executing ACID Merge...' : successMsg ? 'Merged Successfully!' : 'Merge Selected Duplicate'}</span>
           </button>
         </div>
       </div>

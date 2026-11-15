@@ -261,13 +261,21 @@ export default function MapExplorer({ onSelectCase }) {
                       📍 {c.city || 'India'} • {c.ward_number || c.ward || 'Municipal Ward'}
                     </div>
 
-                    <h5 className="font-semibold text-slate-200 line-clamp-2 leading-snug">{c.title}</h5>
-
-                    {c.address_text && (
-                      <p className="text-[11px] text-slate-400 line-clamp-1 mt-1">
-                        {c.address_text}
-                      </p>
-                    )}
+                    <div className="flex gap-2.5 mt-1.5">
+                      {c.photo_url && (
+                        <div className="w-14 h-14 rounded-lg overflow-hidden shrink-0 border border-slate-700 bg-slate-800">
+                          <img src={c.photo_url} alt="" className="w-full h-full object-cover" onError={(e) => { e.target.parentElement.style.display = 'none'; }} />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <h5 className="font-semibold text-slate-200 line-clamp-2 leading-snug">{c.title}</h5>
+                        {c.address_text && (
+                          <p className="text-[11px] text-slate-400 line-clamp-1 mt-0.5">
+                            {c.address_text}
+                          </p>
+                        )}
+                      </div>
+                    </div>
 
                     <div className="flex items-center justify-between text-[11px] text-slate-400 mt-2.5 pt-2 border-t border-slate-800/60">
                       <span className="px-1.5 py-0.2 rounded bg-slate-800 text-slate-300 font-medium text-[10px]">

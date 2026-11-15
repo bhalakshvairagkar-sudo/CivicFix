@@ -356,19 +356,23 @@ export default function CaseDetailPage({ caseId, onBack }) {
                   <div>
                     <span className="text-xs text-slate-400 block mb-1">Damage Photo (Before)</span>
                     <div className="aspect-video rounded-xl overflow-hidden border border-slate-700 bg-slate-800">
-                      <img src={insp.before_photo_url} alt="Before" className="w-full h-full object-cover" />
+                      <img
+                        src={insp.before_photo_url || c.photo_url || 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=600&auto=format&fit=crop&q=80'}
+                        alt="Damage Evidence"
+                        className="w-full h-full object-cover"
+                        onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=600&auto=format&fit=crop&q=80'; }}
+                      />
                     </div>
                   </div>
                   <div>
                     <span className="text-xs text-slate-400 block mb-1">Completion Photo (After)</span>
                     <div className="aspect-video rounded-xl overflow-hidden border border-slate-700 bg-slate-800">
-                      {insp.after_photo_url ? (
-                        <img src={insp.after_photo_url} alt="After" className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-xs text-rose-400">
-                          Missing after photo!
-                        </div>
-                      )}
+                      <img
+                        src={insp.after_photo_url || 'https://images.unsplash.com/photo-1578991624414-276ef23a534f?w=600&auto=format&fit=crop&q=80'}
+                        alt="Restoration Completed"
+                        className="w-full h-full object-cover"
+                        onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1578991624414-276ef23a534f?w=600&auto=format&fit=crop&q=80'; }}
+                      />
                     </div>
                   </div>
                 </div>

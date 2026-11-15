@@ -1,4 +1,6 @@
 import {
+  DEFECT_PHOTOS,
+  AFTER_PHOTOS,
   DEMO_USERS,
   MOCK_CASES,
   MOCK_ASSETS,
@@ -77,32 +79,32 @@ export async function handleMockRequest(endpoint, options = {}) {
       kpis: {
         total_citizen_reports: reportsState.length + 23,
         total_cases: casesState.length,
-        active_cases: 23,
-        closed_cases: 12,
-        recurring_failures_count: 9,
+        active_cases: casesState.filter(c => c.status !== 'VERIFIED_CLOSED' && c.status !== 'DUPLICATE_MERGED').length,
+        closed_cases: casesState.filter(c => c.status === 'VERIFIED_CLOSED').length,
+        recurring_failures_count: casesState.filter(c => c.is_recurring_failure).length,
         recurring_failure_rate_pct: 25.7,
         avg_resolution_hours: 36.4,
         total_repair_expenditure: 4280000.0
       },
       category_distribution: [
-        { category: "POTHOLE", count: 10, closed_count: 3, avg_priority: 86.4 },
-        { category: "STREETLIGHT", count: 7, closed_count: 2, avg_priority: 74.0 },
-        { category: "DRAINAGE", count: 6, closed_count: 2, avg_priority: 84.5 },
-        { category: "WATER_LEAK", count: 5, closed_count: 2, avg_priority: 82.2 },
-        { category: "FOOTPATH", count: 4, closed_count: 2, avg_priority: 60.5 },
-        { category: "TRAFFIC_SIGNAL", count: 3, closed_count: 1, avg_priority: 81.3 }
+        { category: "POTHOLE", count: casesState.filter(c => c.category === 'POTHOLE').length, closed_count: 3, avg_priority: 86.4 },
+        { category: "STREETLIGHT", count: casesState.filter(c => c.category === 'STREETLIGHT').length, closed_count: 2, avg_priority: 74.0 },
+        { category: "DRAINAGE", count: casesState.filter(c => c.category === 'DRAINAGE').length, closed_count: 2, avg_priority: 84.5 },
+        { category: "WATER_LEAK", count: casesState.filter(c => c.category === 'WATER_LEAK').length, closed_count: 2, avg_priority: 82.2 },
+        { category: "FOOTPATH", count: casesState.filter(c => c.category === 'FOOTPATH').length, closed_count: 2, avg_priority: 60.5 },
+        { category: "TRAFFIC_SIGNAL", count: casesState.filter(c => c.category === 'TRAFFIC_SIGNAL').length, closed_count: 1, avg_priority: 81.3 }
       ],
       status_distribution: [
-        { status: "IN_PROGRESS", count: 10 },
-        { status: "OPEN", count: 7 },
-        { status: "ASSIGNED", count: 6 },
-        { status: "VERIFIED_CLOSED", count: 12 }
+        { status: "IN_PROGRESS", count: casesState.filter(c => c.status === 'IN_PROGRESS').length },
+        { status: "OPEN", count: casesState.filter(c => c.status === 'OPEN').length },
+        { status: "ASSIGNED", count: casesState.filter(c => c.status === 'ASSIGNED').length },
+        { status: "VERIFIED_CLOSED", count: casesState.filter(c => c.status === 'VERIFIED_CLOSED').length }
       ],
       severity_distribution: [
-        { severity: "CRITICAL", count: 12 },
-        { severity: "HIGH", count: 12 },
-        { severity: "MEDIUM", count: 7 },
-        { severity: "LOW", count: 4 }
+        { severity: "CRITICAL", count: casesState.filter(c => c.severity === 'CRITICAL').length },
+        { severity: "HIGH", count: casesState.filter(c => c.severity === 'HIGH').length },
+        { severity: "MEDIUM", count: casesState.filter(c => c.severity === 'MEDIUM').length },
+        { severity: "LOW", count: casesState.filter(c => c.severity === 'LOW').length }
       ],
       department_performance: [
         { department_id: 1, code: "ROADS", name: "Roads & Bridges Department", annual_budget: 12000000.0, spent_budget: 3450000.0, budget_utilized_pct: 28.75, total_cases: 14, active_cases: 9, closed_cases: 5, recurring_cases: 4, avg_resolution_hours: 32.5, total_work_order_expenditure: 1645000.0 },
@@ -144,6 +146,11 @@ export async function handleMockRequest(endpoint, options = {}) {
     const cItem = casesState.find(c => c.case_id === cid) || casesState[0];
     const cReports = reportsState.filter(r => r.case_id === cid);
     const cWos = workOrdersState.filter(w => w.case_id === cid);
+    
+    // Choose authentic after-repair photo
+    const afterPhoto = AFTER_PHOTOS[cid % AFTER_PHOTOS.length];
+    const beforePhoto = cItem.photo_url || (DEFECT_PHOTOS[cItem.category] ? DEFECT_PHOTOS[cItem.category][0] : DEFECT_PHOTOS.POTHOLE[0]);
+
     return {
       case: cItem,
       reports: cReports.length ? cReports : reportsState.slice(0, 2),
@@ -156,7 +163,11 @@ export async function handleMockRequest(endpoint, options = {}) {
           inspector_id: 1,
           inspector_name: "Marcus Vance",
           decision: "PASSED",
-          notes: "Quality check passed. Compaction and drainage slope verified with laser leveler.",
+          quality_rating: 5,
+          durability_assessment: "EXCELLENT",
+          before_photo_url: beforePhoto,
+          after_photo_url: afterPhoto,
+          inspection_notes: "Quality check passed. Bituminous compaction and drainage pitch verified with laser profiler.",
           created_at: "2026-11-14T15:30:00Z"
         }
       ],
@@ -166,26 +177,109 @@ export async function handleMockRequest(endpoint, options = {}) {
 
   // Duplicate candidates
   if (cleanPath.includes('/duplicate-candidates')) {
-    return [
-      {
-        report_id: 2,
-        tracking_code: "REP-IND-002",
-        distance_meters: 14.2,
-        category: "POTHOLE",
-        severity: "CRITICAL",
-        address_text: "Lady Curzon Rd, 15m from Emergency Gate",
-        created_at: "2026-11-10T09:15:00Z",
-        reporter_name: "Priya Nair",
-        confidence_score: 0.98
-      }
-    ];
+    const cidMatch = cleanPath.match(/cases\/(\d+)\/duplicate-candidates/);
+    const targetId = cidMatch ? parseInt(cidMatch[1], 10) : 1;
+    const target = casesState.find(c => c.case_id === targetId) || casesState[0];
+    
+    // Find candidates in same category or nearby
+    let cands = casesState
+      .filter(c => c.case_id !== target.case_id && c.status !== 'DUPLICATE_MERGED')
+      .map(c => {
+        const dLat = (c.latitude - target.latitude) * 111320;
+        const dLng = (c.longitude - target.longitude) * 111320 * Math.cos(target.latitude * Math.PI / 180);
+        const dist = Math.max(14, Math.round(Math.sqrt(dLat * dLat + dLng * dLng)));
+        const sameCategory = c.category === target.category;
+        const confidence = sameCategory ? Math.max(85, 98 - Math.round(dist / 120)) : Math.max(68, 80 - Math.round(dist / 200));
+
+        return {
+          case_id: c.case_id,
+          case_number: c.case_number,
+          title: c.title,
+          category: c.category,
+          severity: c.severity,
+          status: c.status,
+          distance_meters: dist,
+          duplicate_confidence_pct: Math.min(99, confidence),
+          address_text: c.address_text || `${dist}m from target site`,
+          reasons: [
+            `Within ${dist}m spatial proximity corridor`,
+            sameCategory ? `Matching defect classification: ${c.category}` : `Adjacent infrastructure buffer impact`,
+            `Corroborating citizen photo evidence within 48h temporal window`
+          ]
+        };
+      })
+      .sort((a, b) => b.duplicate_confidence_pct - a.duplicate_confidence_pct)
+      .slice(0, 3);
+
+    if (cands.length === 0) {
+      cands = [{
+        case_id: target.case_id === 1 ? 2 : 1,
+        case_number: target.case_id === 1 ? 'CF-2026-0002' : 'CF-2026-0001',
+        title: `Secondary report: ${target.title}`,
+        category: target.category,
+        severity: target.severity,
+        status: 'OPEN',
+        distance_meters: 18.4,
+        duplicate_confidence_pct: 96,
+        address_text: target.address_text,
+        reasons: [
+          'Within 25m spatial radius (18.4m)',
+          `Matching defect classification: ${target.category}`,
+          'Corroborating citizen photo evidence within 48h temporal window'
+        ]
+      }];
+    }
+    return cands;
   }
 
   // Merge duplicate
   if (cleanPath.includes('/merge-duplicate')) {
+    const cidMatch = cleanPath.match(/cases\/(\d+)\/merge-duplicate/);
+    const targetId = cidMatch ? parseInt(cidMatch[1], 10) : 1;
+    const secondaryId = body.secondary_case_id;
+
+    const primaryCase = casesState.find(c => c.case_id === targetId);
+    const secondaryCase = casesState.find(c => c.case_id === secondaryId);
+
+    if (secondaryCase) {
+      secondaryCase.status = 'DUPLICATE_MERGED';
+    }
+    if (primaryCase) {
+      primaryCase.citizen_reports_count = (primaryCase.citizen_reports_count || 1) + 1;
+      primaryCase.duplicate_merged_count = (primaryCase.duplicate_merged_count || 0) + 1;
+      primaryCase.priority_score = Math.min(100, Math.round((primaryCase.priority_score || 72) + 5));
+      if (primaryCase.priority_score >= 80) primaryCase.priority_level = 'CRITICAL';
+      else if (primaryCase.priority_score >= 65) primaryCase.priority_level = 'HIGH';
+      primaryCase.version = (primaryCase.version || 1) + 1;
+    }
+
+    // Re-link reports
+    if (secondaryId && primaryCase) {
+      reportsState.forEach(r => {
+        if (r.case_id === secondaryId) {
+          r.case_id = primaryCase.case_id;
+        }
+      });
+    }
+
+    // Audit log
+    auditLogsState.unshift({
+      log_id: auditLogsState.length + 1,
+      event_type: 'DUPLICATE_MERGED',
+      entity_name: 'repair_cases',
+      entity_id: primaryCase ? primaryCase.case_id : targetId,
+      user_name: 'Marcus Vance',
+      old_state: { status: 'OPEN', duplicate_merged_count: primaryCase ? primaryCase.duplicate_merged_count - 1 : 0 },
+      new_state: { status: primaryCase ? primaryCase.status : 'OPEN', duplicate_merged_count: primaryCase ? primaryCase.duplicate_merged_count : 1, merged_case_id: secondaryId },
+      notes: `ACID Transaction: Merged secondary Case #${secondaryCase ? secondaryCase.case_number : secondaryId} into primary Case #${primaryCase ? primaryCase.case_number : targetId}. Priority boosted.`,
+      created_at: new Date().toISOString()
+    });
+
     return {
       success: true,
-      message: "Duplicate citizen report successfully merged under ACID transaction. Priority recalculated."
+      message: `ACID Transaction Complete: Case #${secondaryCase ? secondaryCase.case_number : secondaryId} merged into #${primaryCase ? primaryCase.case_number : targetId}. Priority recalculated to ${primaryCase ? primaryCase.priority_score : 85} pts.`,
+      target_case: primaryCase,
+      secondary_case: secondaryCase
     };
   }
 
@@ -220,20 +314,26 @@ export async function handleMockRequest(endpoint, options = {}) {
     if (method === 'POST') {
       const newId = reportsState.length + 1;
       const code = `REP-IND-${String(newId).padStart(3, '0')}`;
+      const category = body.category || 'POTHOLE';
+      const photos = DEFECT_PHOTOS[category] || DEFECT_PHOTOS.POTHOLE;
+      const photoUrl = body.photo_url || photos[newId % photos.length];
+      
       const newReport = {
         report_id: newId,
         tracking_code: code,
-        category: body.category || 'POTHOLE',
+        category,
         severity: body.severity || 'MEDIUM',
         status: 'SUBMITTED',
         address_text: body.address_text || 'Bengaluru Municipal Corporation Zone',
-        photo_url: body.photo_url || 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=600&auto=format&fit=crop&q=80',
+        photo_url: photoUrl,
         latitude: parseFloat(body.latitude || 12.9716),
         longitude: parseFloat(body.longitude || 77.5946),
         upvote_count: 1,
+        upvotes_count: 1,
         case_id: 1,
         created_at: new Date().toISOString(),
-        reporter_name: 'Verified Citizen Resident'
+        reporter_name: 'Verified Citizen Resident',
+        citizen_name: 'Verified Citizen Resident'
       };
       reportsState.unshift(newReport);
       return {
@@ -270,6 +370,7 @@ export async function handleMockRequest(endpoint, options = {}) {
       const report = reportsState.find(r => r.report_id === rid);
       if (report) {
         report.upvote_count = (report.upvote_count || 0) + 1;
+        report.upvotes_count = report.upvote_count;
       }
     }
     return {

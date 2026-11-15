@@ -274,24 +274,36 @@ export default function CasesPage({ onSelectCase }) {
                         #{c.case_number}
                       </td>
 
-                      {/* Title & Category */}
+                      {/* Title & Category with Photo */}
                       <td className="py-3.5 px-4 max-w-sm">
-                        <div className="font-semibold text-slate-200 line-clamp-1">{c.title}</div>
-                        {c.address_text && (
-                          <div className="text-[11px] text-slate-400 line-clamp-1 mt-0.5">
-                            {c.address_text}
-                          </div>
-                        )}
-                        <div className="text-[11px] text-slate-400 flex items-center gap-2 mt-1">
-                          <span className="px-1.5 py-0.2 rounded bg-slate-800 text-slate-300 font-mono text-[10px]">
-                            {c.category}
-                          </span>
-                          {c.is_recurring_failure && (
-                            <span className="text-purple-400 font-bold flex items-center gap-1 text-[10px]">
-                              <RefreshCw className="w-3 h-3" />
-                              Recurring Defect
-                            </span>
+                        <div className="flex items-start gap-3">
+                          {c.photo_url && (
+                            <img
+                              src={c.photo_url}
+                              alt=""
+                              className="w-11 h-11 rounded-lg object-cover border border-slate-700 bg-slate-800 shrink-0 mt-0.5"
+                              onError={(e) => { e.target.style.display = 'none'; }}
+                            />
                           )}
+                          <div className="min-w-0">
+                            <div className="font-semibold text-slate-200 line-clamp-1">{c.title}</div>
+                            {c.address_text && (
+                              <div className="text-[11px] text-slate-400 line-clamp-1 mt-0.5">
+                                {c.address_text}
+                              </div>
+                            )}
+                            <div className="text-[11px] text-slate-400 flex items-center gap-2 mt-1">
+                              <span className="px-1.5 py-0.2 rounded bg-slate-800 text-slate-300 font-mono text-[10px]">
+                                {c.category}
+                              </span>
+                              {c.is_recurring_failure && (
+                                <span className="text-purple-400 font-bold flex items-center gap-1 text-[10px]">
+                                  <RefreshCw className="w-3 h-3" />
+                                  Recurring Defect
+                                </span>
+                              )}
+                            </div>
+                          </div>
                         </div>
                       </td>
 

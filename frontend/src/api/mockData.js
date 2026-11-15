@@ -1,5 +1,45 @@
 // CivicFix In-Browser Client-Side Mock Database & Fallback Gateway
-// Generated from serve_static.py (India Division National Grid)
+// Authentic Verified Images & India National Infrastructure Grid
+
+export const DEFECT_PHOTOS = {
+  "POTHOLE": [
+    "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=600&auto=format&fit=crop&q=80",
+    "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=600&auto=format&fit=crop&q=80",
+    "https://images.unsplash.com/photo-1596484552834-6a58f850e0a1?w=600&auto=format&fit=crop&q=80",
+    "https://images.unsplash.com/photo-1528732263440-4dd1a18a4cc2?w=600&auto=format&fit=crop&q=80"
+  ],
+  "STREETLIGHT": [
+    "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?w=600&auto=format&fit=crop&q=80",
+    "https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=600&auto=format&fit=crop&q=80",
+    "https://images.unsplash.com/photo-1527482797697-8795b05a13fe?w=600&auto=format&fit=crop&q=80"
+  ],
+  "DRAINAGE": [
+    "https://images.unsplash.com/photo-1547683905-f686c993aae5?w=600&auto=format&fit=crop&q=80",
+    "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?w=600&auto=format&fit=crop&q=80",
+    "https://images.unsplash.com/photo-1444723121867-7a241cacace9?w=600&auto=format&fit=crop&q=80",
+    "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=600&auto=format&fit=crop&q=80"
+  ],
+  "WATER_LEAK": [
+    "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=600&auto=format&fit=crop&q=80",
+    "https://images.unsplash.com/photo-1581244277943-fe4a9c777189?w=600&auto=format&fit=crop&q=80",
+    "https://images.unsplash.com/photo-1585338107529-13afc5f02586?w=600&auto=format&fit=crop&q=80",
+    "https://images.unsplash.com/photo-1584467735871-8e85353a8413?w=600&auto=format&fit=crop&q=80"
+  ],
+  "FOOTPATH": [
+    "https://images.unsplash.com/photo-1590674899484-d5640e854abe?w=600&auto=format&fit=crop&q=80",
+    "https://images.unsplash.com/photo-1506157786151-b8491531f063?w=600&auto=format&fit=crop&q=80"
+  ],
+  "TRAFFIC_SIGNAL": [
+    "https://images.unsplash.com/photo-1506521781263-d8422e82f27a?w=600&auto=format&fit=crop&q=80",
+    "https://images.unsplash.com/photo-1566232392379-afd9298e6a46?w=600&auto=format&fit=crop&q=80",
+    "https://images.unsplash.com/photo-1572021335469-31706a17aaef?w=600&auto=format&fit=crop&q=80"
+  ]
+};
+
+export const AFTER_PHOTOS = [
+  "https://images.unsplash.com/photo-1578991624414-276ef23a534f?w=600&auto=format&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=600&auto=format&fit=crop&q=80"
+];
 
 export const DEMO_USERS = {
   "marcus.admin@civicfix.gov": {
@@ -92,7 +132,8 @@ export const MOCK_CASES = [
     "longitude": 77.6042,
     "is_recurring_failure": true,
     "version": 3,
-    "created_at": "2026-11-10T08:30:00Z"
+    "created_at": "2026-11-10T08:30:00Z",
+    "photo_url": "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=600&auto=format&fit=crop&q=80"
   },
   {
     "case_id": 2,
@@ -127,7 +168,8 @@ export const MOCK_CASES = [
     "longitude": 77.6412,
     "is_recurring_failure": false,
     "version": 1,
-    "created_at": "2026-11-11T11:15:00Z"
+    "created_at": "2026-11-11T11:15:00Z",
+    "photo_url": "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?w=600&auto=format&fit=crop&q=80"
   },
   {
     "case_id": 3,
@@ -159,7 +201,8 @@ export const MOCK_CASES = [
     "longitude": 77.6245,
     "is_recurring_failure": true,
     "version": 2,
-    "created_at": "2026-11-12T14:45:00Z"
+    "created_at": "2026-11-12T14:45:00Z",
+    "photo_url": "https://images.unsplash.com/photo-1547683905-f686c993aae5?w=600&auto=format&fit=crop&q=80"
   },
   {
     "case_id": 4,
@@ -194,7 +237,8 @@ export const MOCK_CASES = [
     "longitude": 77.6015,
     "is_recurring_failure": false,
     "version": 4,
-    "created_at": "2026-11-08T09:00:00Z"
+    "created_at": "2026-11-08T09:00:00Z",
+    "photo_url": "https://images.unsplash.com/photo-1590674899484-d5640e854abe?w=600&auto=format&fit=crop&q=80"
   },
   {
     "case_id": 5,
@@ -226,7 +270,8 @@ export const MOCK_CASES = [
     "longitude": 77.7381,
     "is_recurring_failure": true,
     "version": 2,
-    "created_at": "2026-11-13T07:20:00Z"
+    "created_at": "2026-11-13T07:20:00Z",
+    "photo_url": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=600&auto=format&fit=crop&q=80"
   },
   {
     "case_id": 6,
@@ -258,7 +303,8 @@ export const MOCK_CASES = [
     "longitude": 77.6227,
     "is_recurring_failure": true,
     "version": 1,
-    "created_at": "2026-11-14T06:45:00Z"
+    "created_at": "2026-11-14T06:45:00Z",
+    "photo_url": "https://images.unsplash.com/photo-1506521781263-d8422e82f27a?w=600&auto=format&fit=crop&q=80"
   },
   {
     "case_id": 7,
@@ -290,7 +336,8 @@ export const MOCK_CASES = [
     "longitude": 77.597,
     "is_recurring_failure": true,
     "version": 2,
-    "created_at": "2026-11-12T10:15:00Z"
+    "created_at": "2026-11-12T10:15:00Z",
+    "photo_url": "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=600&auto=format&fit=crop&q=80"
   },
   {
     "case_id": 8,
@@ -322,7 +369,8 @@ export const MOCK_CASES = [
     "longitude": 77.5713,
     "is_recurring_failure": false,
     "version": 3,
-    "created_at": "2026-11-09T18:30:00Z"
+    "created_at": "2026-11-09T18:30:00Z",
+    "photo_url": "https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=600&auto=format&fit=crop&q=80"
   },
   {
     "case_id": 9,
@@ -354,7 +402,8 @@ export const MOCK_CASES = [
     "longitude": 77.6446,
     "is_recurring_failure": true,
     "version": 1,
-    "created_at": "2026-11-13T13:00:00Z"
+    "created_at": "2026-11-13T13:00:00Z",
+    "photo_url": "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?w=600&auto=format&fit=crop&q=80"
   },
   {
     "case_id": 10,
@@ -386,7 +435,8 @@ export const MOCK_CASES = [
     "longitude": 77.5824,
     "is_recurring_failure": false,
     "version": 1,
-    "created_at": "2026-11-12T16:20:00Z"
+    "created_at": "2026-11-12T16:20:00Z",
+    "photo_url": "https://images.unsplash.com/photo-1506157786151-b8491531f063?w=600&auto=format&fit=crop&q=80"
   },
   {
     "case_id": 11,
@@ -418,7 +468,8 @@ export const MOCK_CASES = [
     "longitude": 77.6292,
     "is_recurring_failure": true,
     "version": 2,
-    "created_at": "2026-11-11T09:40:00Z"
+    "created_at": "2026-11-11T09:40:00Z",
+    "photo_url": "https://images.unsplash.com/photo-1581244277943-fe4a9c777189?w=600&auto=format&fit=crop&q=80"
   },
   {
     "case_id": 12,
@@ -453,7 +504,8 @@ export const MOCK_CASES = [
     "longitude": 77.64,
     "is_recurring_failure": true,
     "version": 1,
-    "created_at": "2026-11-14T08:10:00Z"
+    "created_at": "2026-11-14T08:10:00Z",
+    "photo_url": "https://images.unsplash.com/photo-1566232392379-afd9298e6a46?w=600&auto=format&fit=crop&q=80"
   },
   {
     "case_id": 13,
@@ -485,7 +537,8 @@ export const MOCK_CASES = [
     "longitude": 77.6833,
     "is_recurring_failure": true,
     "version": 3,
-    "created_at": "2026-11-10T14:00:00Z"
+    "created_at": "2026-11-10T14:00:00Z",
+    "photo_url": "https://images.unsplash.com/photo-1596484552834-6a58f850e0a1?w=600&auto=format&fit=crop&q=80"
   },
   {
     "case_id": 14,
@@ -517,7 +570,8 @@ export const MOCK_CASES = [
     "longitude": 77.5701,
     "is_recurring_failure": true,
     "version": 1,
-    "created_at": "2026-11-12T19:40:00Z"
+    "created_at": "2026-11-12T19:40:00Z",
+    "photo_url": "https://images.unsplash.com/photo-1527482797697-8795b05a13fe?w=600&auto=format&fit=crop&q=80"
   },
   {
     "case_id": 15,
@@ -549,7 +603,8 @@ export const MOCK_CASES = [
     "longitude": 77.6083,
     "is_recurring_failure": true,
     "version": 1,
-    "created_at": "2026-11-14T09:15:00Z"
+    "created_at": "2026-11-14T09:15:00Z",
+    "photo_url": "https://images.unsplash.com/photo-1444723121867-7a241cacace9?w=600&auto=format&fit=crop&q=80"
   },
   {
     "case_id": 16,
@@ -584,7 +639,8 @@ export const MOCK_CASES = [
     "longitude": 77.6489,
     "is_recurring_failure": true,
     "version": 2,
-    "created_at": "2026-11-13T11:00:00Z"
+    "created_at": "2026-11-13T11:00:00Z",
+    "photo_url": "https://images.unsplash.com/photo-1590674899484-d5640e854abe?w=600&auto=format&fit=crop&q=80"
   },
   {
     "case_id": 17,
@@ -616,7 +672,8 @@ export const MOCK_CASES = [
     "longitude": 77.6075,
     "is_recurring_failure": true,
     "version": 1,
-    "created_at": "2026-11-14T10:30:00Z"
+    "created_at": "2026-11-14T10:30:00Z",
+    "photo_url": "https://images.unsplash.com/photo-1585338107529-13afc5f02586?w=600&auto=format&fit=crop&q=80"
   },
   {
     "case_id": 18,
@@ -648,7 +705,8 @@ export const MOCK_CASES = [
     "longitude": 77.617,
     "is_recurring_failure": true,
     "version": 4,
-    "created_at": "2026-11-09T08:00:00Z"
+    "created_at": "2026-11-09T08:00:00Z",
+    "photo_url": "https://images.unsplash.com/photo-1572021335469-31706a17aaef?w=600&auto=format&fit=crop&q=80"
   },
   {
     "case_id": 19,
@@ -680,7 +738,8 @@ export const MOCK_CASES = [
     "longitude": 77.6602,
     "is_recurring_failure": true,
     "version": 1,
-    "created_at": "2026-11-12T15:00:00Z"
+    "created_at": "2026-11-12T15:00:00Z",
+    "photo_url": "https://images.unsplash.com/photo-1528732263440-4dd1a18a4cc2?w=600&auto=format&fit=crop&q=80"
   },
   {
     "case_id": 20,
@@ -712,7 +771,8 @@ export const MOCK_CASES = [
     "longitude": 77.6101,
     "is_recurring_failure": true,
     "version": 2,
-    "created_at": "2026-11-11T17:10:00Z"
+    "created_at": "2026-11-11T17:10:00Z",
+    "photo_url": "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?w=600&auto=format&fit=crop&q=80"
   },
   {
     "case_id": 21,
@@ -744,7 +804,8 @@ export const MOCK_CASES = [
     "longitude": 77.6974,
     "is_recurring_failure": true,
     "version": 1,
-    "created_at": "2026-11-13T18:20:00Z"
+    "created_at": "2026-11-13T18:20:00Z",
+    "photo_url": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=600&auto=format&fit=crop&q=80"
   },
   {
     "case_id": 22,
@@ -776,7 +837,8 @@ export const MOCK_CASES = [
     "longitude": 77.592,
     "is_recurring_failure": false,
     "version": 3,
-    "created_at": "2026-11-07T12:00:00Z"
+    "created_at": "2026-11-07T12:00:00Z",
+    "photo_url": "https://images.unsplash.com/photo-1506157786151-b8491531f063?w=600&auto=format&fit=crop&q=80"
   },
   {
     "case_id": 23,
@@ -808,7 +870,8 @@ export const MOCK_CASES = [
     "longitude": 77.5755,
     "is_recurring_failure": true,
     "version": 1,
-    "created_at": "2026-11-12T07:15:00Z"
+    "created_at": "2026-11-12T07:15:00Z",
+    "photo_url": "https://images.unsplash.com/photo-1584467735871-8e85353a8413?w=600&auto=format&fit=crop&q=80"
   },
   {
     "case_id": 24,
@@ -840,7 +903,8 @@ export const MOCK_CASES = [
     "longitude": 77.6387,
     "is_recurring_failure": true,
     "version": 2,
-    "created_at": "2026-11-11T13:45:00Z"
+    "created_at": "2026-11-11T13:45:00Z",
+    "photo_url": "https://images.unsplash.com/photo-1506521781263-d8422e82f27a?w=600&auto=format&fit=crop&q=80"
   },
   {
     "case_id": 25,
@@ -872,7 +936,8 @@ export const MOCK_CASES = [
     "longitude": 77.6959,
     "is_recurring_failure": true,
     "version": 1,
-    "created_at": "2026-11-13T06:00:00Z"
+    "created_at": "2026-11-13T06:00:00Z",
+    "photo_url": "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=600&auto=format&fit=crop&q=80"
   },
   {
     "case_id": 26,
@@ -904,7 +969,8 @@ export const MOCK_CASES = [
     "longitude": 77.6872,
     "is_recurring_failure": true,
     "version": 2,
-    "created_at": "2026-11-10T22:30:00Z"
+    "created_at": "2026-11-10T22:30:00Z",
+    "photo_url": "https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=600&auto=format&fit=crop&q=80"
   },
   {
     "case_id": 27,
@@ -936,7 +1002,8 @@ export const MOCK_CASES = [
     "longitude": 77.5456,
     "is_recurring_failure": true,
     "version": 1,
-    "created_at": "2026-11-12T12:00:00Z"
+    "created_at": "2026-11-12T12:00:00Z",
+    "photo_url": "https://images.unsplash.com/photo-1547683905-f686c993aae5?w=600&auto=format&fit=crop&q=80"
   },
   {
     "case_id": 28,
@@ -968,7 +1035,8 @@ export const MOCK_CASES = [
     "longitude": 77.5978,
     "is_recurring_failure": false,
     "version": 4,
-    "created_at": "2026-11-06T15:20:00Z"
+    "created_at": "2026-11-06T15:20:00Z",
+    "photo_url": "https://images.unsplash.com/photo-1590674899484-d5640e854abe?w=600&auto=format&fit=crop&q=80"
   },
   {
     "case_id": 29,
@@ -1000,7 +1068,8 @@ export const MOCK_CASES = [
     "longitude": 77.6133,
     "is_recurring_failure": true,
     "version": 1,
-    "created_at": "2026-11-13T16:50:00Z"
+    "created_at": "2026-11-13T16:50:00Z",
+    "photo_url": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=600&auto=format&fit=crop&q=80"
   },
   {
     "case_id": 30,
@@ -1032,7 +1101,8 @@ export const MOCK_CASES = [
     "longitude": 77.6895,
     "is_recurring_failure": true,
     "version": 2,
-    "created_at": "2026-11-12T08:30:00Z"
+    "created_at": "2026-11-12T08:30:00Z",
+    "photo_url": "https://images.unsplash.com/photo-1566232392379-afd9298e6a46?w=600&auto=format&fit=crop&q=80"
   },
   {
     "case_id": 31,
@@ -1064,7 +1134,8 @@ export const MOCK_CASES = [
     "longitude": 72.8232,
     "is_recurring_failure": true,
     "version": 1,
-    "created_at": "2026-11-14T05:00:00Z"
+    "created_at": "2026-11-14T05:00:00Z",
+    "photo_url": "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=600&auto=format&fit=crop&q=80"
   },
   {
     "case_id": 32,
@@ -1096,7 +1167,8 @@ export const MOCK_CASES = [
     "longitude": 72.8402,
     "is_recurring_failure": true,
     "version": 2,
-    "created_at": "2026-11-13T09:10:00Z"
+    "created_at": "2026-11-13T09:10:00Z",
+    "photo_url": "https://images.unsplash.com/photo-1527482797697-8795b05a13fe?w=600&auto=format&fit=crop&q=80"
   },
   {
     "case_id": 33,
@@ -1131,7 +1203,8 @@ export const MOCK_CASES = [
     "longitude": 77.2167,
     "is_recurring_failure": true,
     "version": 1,
-    "created_at": "2026-11-14T07:30:00Z"
+    "created_at": "2026-11-14T07:30:00Z",
+    "photo_url": "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?w=600&auto=format&fit=crop&q=80"
   },
   {
     "case_id": 34,
@@ -1163,7 +1236,8 @@ export const MOCK_CASES = [
     "longitude": 78.3808,
     "is_recurring_failure": true,
     "version": 2,
-    "created_at": "2026-11-13T14:15:00Z"
+    "created_at": "2026-11-13T14:15:00Z",
+    "photo_url": "https://images.unsplash.com/photo-1581244277943-fe4a9c777189?w=600&auto=format&fit=crop&q=80"
   },
   {
     "case_id": 35,
@@ -1195,7 +1269,8 @@ export const MOCK_CASES = [
     "longitude": 73.8436,
     "is_recurring_failure": true,
     "version": 1,
-    "created_at": "2026-11-14T11:50:00Z"
+    "created_at": "2026-11-14T11:50:00Z",
+    "photo_url": "https://images.unsplash.com/photo-1572021335469-31706a17aaef?w=600&auto=format&fit=crop&q=80"
   }
 ];
 
@@ -1424,7 +1499,9 @@ export const MOCK_REPORTS = [
     "longitude": 77.6042,
     "upvote_count": 5,
     "created_at": "2026-11-10T08:30:00Z",
-    "reporter_name": "Aarav Sharma"
+    "reporter_name": "Aarav Sharma",
+    "citizen_name": "Aarav Sharma",
+    "upvotes_count": 5
   },
   {
     "report_id": 2,
@@ -1434,12 +1511,14 @@ export const MOCK_REPORTS = [
     "severity": "CRITICAL",
     "status": "LINKED_TO_CASE",
     "address_text": "Opposite Toit Brewpub, 100 Feet Rd, Defence Colony, Indiranagar, Bengaluru 560038",
-    "photo_url": "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?w=600&auto=format&fit=crop&q=80",
+    "photo_url": "https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=600&auto=format&fit=crop&q=80",
     "latitude": 12.9719,
     "longitude": 77.6412,
     "upvote_count": 7,
     "created_at": "2026-11-11T11:15:00Z",
-    "reporter_name": "Priya Nair"
+    "reporter_name": "Priya Nair",
+    "citizen_name": "Priya Nair",
+    "upvotes_count": 7
   },
   {
     "report_id": 3,
@@ -1449,12 +1528,14 @@ export const MOCK_REPORTS = [
     "severity": "HIGH",
     "status": "SUBMITTED",
     "address_text": "Sony World Junction, 80 Feet Rd, 4th Block, Koramangala, Bengaluru 560034",
-    "photo_url": "https://images.unsplash.com/photo-1541888946425-d0fbb180c5f7?w=600&auto=format&fit=crop&q=80",
+    "photo_url": "https://images.unsplash.com/photo-1444723121867-7a241cacace9?w=600&auto=format&fit=crop&q=80",
     "latitude": 12.9352,
     "longitude": 77.6245,
     "upvote_count": 9,
     "created_at": "2026-11-12T14:45:00Z",
-    "reporter_name": "Rajesh Iyer"
+    "reporter_name": "Rajesh Iyer",
+    "citizen_name": "Rajesh Iyer",
+    "upvotes_count": 9
   },
   {
     "report_id": 4,
@@ -1464,12 +1545,14 @@ export const MOCK_REPORTS = [
     "severity": "MEDIUM",
     "status": "LINKED_TO_CASE",
     "address_text": "Residency Rd, Shanthala Nagar, Ashok Nagar, Bengaluru 560025",
-    "photo_url": "https://images.unsplash.com/photo-1590674899484-d5640e854abe?w=600&auto=format&fit=crop&q=80",
+    "photo_url": "https://images.unsplash.com/photo-1506157786151-b8491531f063?w=600&auto=format&fit=crop&q=80",
     "latitude": 12.9692,
     "longitude": 77.6015,
     "upvote_count": 11,
     "created_at": "2026-11-08T09:00:00Z",
-    "reporter_name": "Ananya Patel"
+    "reporter_name": "Ananya Patel",
+    "citizen_name": "Ananya Patel",
+    "upvotes_count": 11
   },
   {
     "report_id": 5,
@@ -1479,12 +1562,14 @@ export const MOCK_REPORTS = [
     "severity": "CRITICAL",
     "status": "LINKED_TO_CASE",
     "address_text": "ITPL Main Rd, KIADB Export Promotion Industrial Area, Whitefield, Bengaluru 560066",
-    "photo_url": "https://images.unsplash.com/photo-1584467735871-8e85353a8413?w=600&auto=format&fit=crop&q=80",
+    "photo_url": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=600&auto=format&fit=crop&q=80",
     "latitude": 12.9866,
     "longitude": 77.7381,
     "upvote_count": 13,
     "created_at": "2026-11-13T07:20:00Z",
-    "reporter_name": "Vikram Malhotra"
+    "reporter_name": "Vikram Malhotra",
+    "citizen_name": "Vikram Malhotra",
+    "upvotes_count": 13
   },
   {
     "report_id": 6,
@@ -1494,12 +1579,14 @@ export const MOCK_REPORTS = [
     "severity": "CRITICAL",
     "status": "LINKED_TO_CASE",
     "address_text": "Central Silk Board Flyover Junction, Hosur Rd, BTM Layout 1st Stage, Bengaluru 560068",
-    "photo_url": "https://images.unsplash.com/photo-1508873696983-2df5293cb325?w=600&auto=format&fit=crop&q=80",
+    "photo_url": "https://images.unsplash.com/photo-1572021335469-31706a17aaef?w=600&auto=format&fit=crop&q=80",
     "latitude": 12.9172,
     "longitude": 77.6227,
     "upvote_count": 15,
     "created_at": "2026-11-14T06:45:00Z",
-    "reporter_name": "Sunita Deshmukh"
+    "reporter_name": "Sunita Deshmukh",
+    "citizen_name": "Sunita Deshmukh",
+    "upvotes_count": 15
   },
   {
     "report_id": 7,
@@ -1509,12 +1596,14 @@ export const MOCK_REPORTS = [
     "severity": "HIGH",
     "status": "LINKED_TO_CASE",
     "address_text": "Bellary Rd, Hebbal, Bengaluru, Karnataka 560024",
-    "photo_url": "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=600&auto=format&fit=crop&q=80",
+    "photo_url": "https://images.unsplash.com/photo-1596484552834-6a58f850e0a1?w=600&auto=format&fit=crop&q=80",
     "latitude": 13.0358,
     "longitude": 77.597,
     "upvote_count": 17,
     "created_at": "2026-11-12T10:15:00Z",
-    "reporter_name": "Rohan Kulkarni"
+    "reporter_name": "Rohan Kulkarni",
+    "citizen_name": "Rohan Kulkarni",
+    "upvotes_count": 17
   },
   {
     "report_id": 8,
@@ -1524,12 +1613,14 @@ export const MOCK_REPORTS = [
     "severity": "LOW",
     "status": "LINKED_TO_CASE",
     "address_text": "Kempegowda Bus Station, Majestic, Subhash Nagar, Bengaluru 560009",
-    "photo_url": "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?w=600&auto=format&fit=crop&q=80",
+    "photo_url": "https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=600&auto=format&fit=crop&q=80",
     "latitude": 12.9767,
     "longitude": 77.5713,
     "upvote_count": 4,
     "created_at": "2026-11-09T18:30:00Z",
-    "reporter_name": "Deepa Verma"
+    "reporter_name": "Deepa Verma",
+    "citizen_name": "Deepa Verma",
+    "upvotes_count": 4
   },
   {
     "report_id": 9,
@@ -1539,12 +1630,14 @@ export const MOCK_REPORTS = [
     "severity": "MEDIUM",
     "status": "SUBMITTED",
     "address_text": "27th Main Rd, Sector 1, HSR Layout, Bengaluru, Karnataka 560102",
-    "photo_url": "https://images.unsplash.com/photo-1541888946425-d0fbb180c5f7?w=600&auto=format&fit=crop&q=80",
+    "photo_url": "https://images.unsplash.com/photo-1547683905-f686c993aae5?w=600&auto=format&fit=crop&q=80",
     "latitude": 12.9121,
     "longitude": 77.6446,
     "upvote_count": 6,
     "created_at": "2026-11-13T13:00:00Z",
-    "reporter_name": "Amit Bhattacharya"
+    "reporter_name": "Amit Bhattacharya",
+    "citizen_name": "Amit Bhattacharya",
+    "upvotes_count": 6
   },
   {
     "report_id": 10,
@@ -1554,12 +1647,14 @@ export const MOCK_REPORTS = [
     "severity": "MEDIUM",
     "status": "LINKED_TO_CASE",
     "address_text": "11th Main Rd, 4th Block, Jayanagar, Bengaluru, Karnataka 560011",
-    "photo_url": "https://images.unsplash.com/photo-1590674899484-d5640e854abe?w=600&auto=format&fit=crop&q=80",
+    "photo_url": "https://images.unsplash.com/photo-1506157786151-b8491531f063?w=600&auto=format&fit=crop&q=80",
     "latitude": 12.9299,
     "longitude": 77.5824,
     "upvote_count": 8,
     "created_at": "2026-11-12T16:20:00Z",
-    "reporter_name": "Neha Joshi"
+    "reporter_name": "Neha Joshi",
+    "citizen_name": "Neha Joshi",
+    "upvotes_count": 8
   },
   {
     "report_id": 11,
@@ -1569,12 +1664,14 @@ export const MOCK_REPORTS = [
     "severity": "HIGH",
     "status": "LINKED_TO_CASE",
     "address_text": "80 Feet Road, 4th Block, Koramangala, Bengaluru, Karnataka 560034",
-    "photo_url": "https://images.unsplash.com/photo-1584467735871-8e85353a8413?w=600&auto=format&fit=crop&q=80",
+    "photo_url": "https://images.unsplash.com/photo-1585338107529-13afc5f02586?w=600&auto=format&fit=crop&q=80",
     "latitude": 12.9338,
     "longitude": 77.6292,
     "upvote_count": 10,
     "created_at": "2026-11-11T09:40:00Z",
-    "reporter_name": "Karthik Swaminathan"
+    "reporter_name": "Karthik Swaminathan",
+    "citizen_name": "Karthik Swaminathan",
+    "upvotes_count": 10
   },
   {
     "report_id": 12,
@@ -1584,12 +1681,14 @@ export const MOCK_REPORTS = [
     "severity": "HIGH",
     "status": "SUBMITTED",
     "address_text": "12th Main Rd, HAL 2nd Stage, Indiranagar, Bengaluru, Karnataka 560008",
-    "photo_url": "https://images.unsplash.com/photo-1508873696983-2df5293cb325?w=600&auto=format&fit=crop&q=80",
+    "photo_url": "https://images.unsplash.com/photo-1572021335469-31706a17aaef?w=600&auto=format&fit=crop&q=80",
     "latitude": 12.975,
     "longitude": 77.64,
     "upvote_count": 12,
     "created_at": "2026-11-14T08:10:00Z",
-    "reporter_name": "Kavita Reddy"
+    "reporter_name": "Kavita Reddy",
+    "citizen_name": "Kavita Reddy",
+    "upvotes_count": 12
   },
   {
     "report_id": 13,
@@ -1604,7 +1703,9 @@ export const MOCK_REPORTS = [
     "longitude": 77.6833,
     "upvote_count": 14,
     "created_at": "2026-11-10T14:00:00Z",
-    "reporter_name": "Tanvi Singhania"
+    "reporter_name": "Tanvi Singhania",
+    "citizen_name": "Tanvi Singhania",
+    "upvotes_count": 14
   },
   {
     "report_id": 14,
@@ -1614,12 +1715,14 @@ export const MOCK_REPORTS = [
     "severity": "HIGH",
     "status": "LINKED_TO_CASE",
     "address_text": "8th Cross Rd, Malleshwaram, Bengaluru, Karnataka 560003",
-    "photo_url": "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?w=600&auto=format&fit=crop&q=80",
+    "photo_url": "https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=600&auto=format&fit=crop&q=80",
     "latitude": 13.0031,
     "longitude": 77.5701,
     "upvote_count": 16,
     "created_at": "2026-11-12T19:40:00Z",
-    "reporter_name": "Gaurav Mehta"
+    "reporter_name": "Gaurav Mehta",
+    "citizen_name": "Gaurav Mehta",
+    "upvotes_count": 16
   },
   {
     "report_id": 15,
@@ -1629,12 +1732,14 @@ export const MOCK_REPORTS = [
     "severity": "CRITICAL",
     "status": "SUBMITTED",
     "address_text": "Commercial St, Tasker Town, Shivaji Nagar, Bengaluru, Karnataka 560001",
-    "photo_url": "https://images.unsplash.com/photo-1541888946425-d0fbb180c5f7?w=600&auto=format&fit=crop&q=80",
+    "photo_url": "https://images.unsplash.com/photo-1444723121867-7a241cacace9?w=600&auto=format&fit=crop&q=80",
     "latitude": 12.9822,
     "longitude": 77.6083,
     "upvote_count": 3,
     "created_at": "2026-11-14T09:15:00Z",
-    "reporter_name": "Pooja Hegde"
+    "reporter_name": "Pooja Hegde",
+    "citizen_name": "Pooja Hegde",
+    "upvotes_count": 3
   },
   {
     "report_id": 16,
@@ -1644,12 +1749,14 @@ export const MOCK_REPORTS = [
     "severity": "HIGH",
     "status": "LINKED_TO_CASE",
     "address_text": "98, HAL Old Airport Rd, Kodihalli, Bengaluru, Karnataka 560017",
-    "photo_url": "https://images.unsplash.com/photo-1590674899484-d5640e854abe?w=600&auto=format&fit=crop&q=80",
+    "photo_url": "https://images.unsplash.com/photo-1506157786151-b8491531f063?w=600&auto=format&fit=crop&q=80",
     "latitude": 12.9582,
     "longitude": 77.6489,
     "upvote_count": 5,
     "created_at": "2026-11-13T11:00:00Z",
-    "reporter_name": "Arjun Sen"
+    "reporter_name": "Arjun Sen",
+    "citizen_name": "Arjun Sen",
+    "upvotes_count": 5
   },
   {
     "report_id": 17,
@@ -1659,12 +1766,14 @@ export const MOCK_REPORTS = [
     "severity": "CRITICAL",
     "status": "SUBMITTED",
     "address_text": "Brigade Rd, Shanthala Nagar, Ashok Nagar, Bengaluru, Karnataka 560001",
-    "photo_url": "https://images.unsplash.com/photo-1584467735871-8e85353a8413?w=600&auto=format&fit=crop&q=80",
+    "photo_url": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=600&auto=format&fit=crop&q=80",
     "latitude": 12.974,
     "longitude": 77.6075,
     "upvote_count": 7,
     "created_at": "2026-11-14T10:30:00Z",
-    "reporter_name": "Meera Pillai"
+    "reporter_name": "Meera Pillai",
+    "citizen_name": "Meera Pillai",
+    "upvotes_count": 7
   },
   {
     "report_id": 18,
@@ -1674,12 +1783,14 @@ export const MOCK_REPORTS = [
     "severity": "HIGH",
     "status": "LINKED_TO_CASE",
     "address_text": "Trinity Circle, MG Road, Craig Park Layout, Bengaluru, Karnataka 560001",
-    "photo_url": "https://images.unsplash.com/photo-1508873696983-2df5293cb325?w=600&auto=format&fit=crop&q=80",
+    "photo_url": "https://images.unsplash.com/photo-1572021335469-31706a17aaef?w=600&auto=format&fit=crop&q=80",
     "latitude": 12.9727,
     "longitude": 77.617,
     "upvote_count": 9,
     "created_at": "2026-11-09T08:00:00Z",
-    "reporter_name": "Sanjay Rao"
+    "reporter_name": "Sanjay Rao",
+    "citizen_name": "Sanjay Rao",
+    "upvotes_count": 9
   },
   {
     "report_id": 19,
@@ -1689,12 +1800,14 @@ export const MOCK_REPORTS = [
     "severity": "HIGH",
     "status": "LINKED_TO_CASE",
     "address_text": "Hosur Rd, Phase 1, Electronic City, Bengaluru, Karnataka 560100",
-    "photo_url": "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=600&auto=format&fit=crop&q=80",
+    "photo_url": "https://images.unsplash.com/photo-1596484552834-6a58f850e0a1?w=600&auto=format&fit=crop&q=80",
     "latitude": 12.8452,
     "longitude": 77.6602,
     "upvote_count": 11,
     "created_at": "2026-11-12T15:00:00Z",
-    "reporter_name": "Bhavna Jain"
+    "reporter_name": "Bhavna Jain",
+    "citizen_name": "Bhavna Jain",
+    "upvotes_count": 11
   },
   {
     "report_id": 20,
@@ -1704,12 +1817,14 @@ export const MOCK_REPORTS = [
     "severity": "MEDIUM",
     "status": "LINKED_TO_CASE",
     "address_text": "7th Cross Rd, 2nd Stage, BTM Layout, Bengaluru, Karnataka 560076",
-    "photo_url": "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?w=600&auto=format&fit=crop&q=80",
+    "photo_url": "https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=600&auto=format&fit=crop&q=80",
     "latitude": 12.9166,
     "longitude": 77.6101,
     "upvote_count": 13,
     "created_at": "2026-11-11T17:10:00Z",
-    "reporter_name": "Manish Tiwari"
+    "reporter_name": "Manish Tiwari",
+    "citizen_name": "Manish Tiwari",
+    "upvotes_count": 13
   },
   {
     "report_id": 21,
@@ -1719,12 +1834,14 @@ export const MOCK_REPORTS = [
     "severity": "CRITICAL",
     "status": "SUBMITTED",
     "address_text": "Outer Ring Rd, Marathahalli Village, Bengaluru, Karnataka 560037",
-    "photo_url": "https://images.unsplash.com/photo-1541888946425-d0fbb180c5f7?w=600&auto=format&fit=crop&q=80",
+    "photo_url": "https://images.unsplash.com/photo-1547683905-f686c993aae5?w=600&auto=format&fit=crop&q=80",
     "latitude": 12.9591,
     "longitude": 77.6974,
     "upvote_count": 15,
     "created_at": "2026-11-13T18:20:00Z",
-    "reporter_name": "Siddharth Menon"
+    "reporter_name": "Siddharth Menon",
+    "citizen_name": "Siddharth Menon",
+    "upvotes_count": 15
   },
   {
     "report_id": 22,
@@ -1734,12 +1851,14 @@ export const MOCK_REPORTS = [
     "severity": "LOW",
     "status": "LINKED_TO_CASE",
     "address_text": "Kasturba Rd, Sampangi Rama Nagar, Bengaluru, Karnataka 560001",
-    "photo_url": "https://images.unsplash.com/photo-1590674899484-d5640e854abe?w=600&auto=format&fit=crop&q=80",
+    "photo_url": "https://images.unsplash.com/photo-1506157786151-b8491531f063?w=600&auto=format&fit=crop&q=80",
     "latitude": 12.975,
     "longitude": 77.592,
     "upvote_count": 17,
     "created_at": "2026-11-07T12:00:00Z",
-    "reporter_name": "Ritu Agarwal"
+    "reporter_name": "Ritu Agarwal",
+    "citizen_name": "Ritu Agarwal",
+    "upvotes_count": 17
   },
   {
     "report_id": 23,
@@ -1749,12 +1868,14 @@ export const MOCK_REPORTS = [
     "severity": "MEDIUM",
     "status": "LINKED_TO_CASE",
     "address_text": "Gandhi Bazaar Main Rd, Basavanagudi, Bengaluru, Karnataka 560004",
-    "photo_url": "https://images.unsplash.com/photo-1584467735871-8e85353a8413?w=600&auto=format&fit=crop&q=80",
+    "photo_url": "https://images.unsplash.com/photo-1585338107529-13afc5f02586?w=600&auto=format&fit=crop&q=80",
     "latitude": 12.9421,
     "longitude": 77.5755,
     "upvote_count": 4,
     "created_at": "2026-11-12T07:15:00Z",
-    "reporter_name": "Alok Pandey"
+    "reporter_name": "Alok Pandey",
+    "citizen_name": "Alok Pandey",
+    "upvotes_count": 4
   },
   {
     "report_id": 24,
@@ -1764,12 +1885,14 @@ export const MOCK_REPORTS = [
     "severity": "MEDIUM",
     "status": "LINKED_TO_CASE",
     "address_text": "Intermediate Ring Rd, Domlur Layout, Domlur, Bengaluru, Karnataka 560071",
-    "photo_url": "https://images.unsplash.com/photo-1508873696983-2df5293cb325?w=600&auto=format&fit=crop&q=80",
+    "photo_url": "https://images.unsplash.com/photo-1572021335469-31706a17aaef?w=600&auto=format&fit=crop&q=80",
     "latitude": 12.9609,
     "longitude": 77.6387,
     "upvote_count": 6,
     "created_at": "2026-11-11T13:45:00Z",
-    "reporter_name": "Preeti Sundaram"
+    "reporter_name": "Preeti Sundaram",
+    "citizen_name": "Preeti Sundaram",
+    "upvotes_count": 6
   },
   {
     "report_id": 25,
@@ -1784,7 +1907,9 @@ export const MOCK_REPORTS = [
     "longitude": 77.6959,
     "upvote_count": 8,
     "created_at": "2026-11-13T06:00:00Z",
-    "reporter_name": "Harish Gowda"
+    "reporter_name": "Harish Gowda",
+    "citizen_name": "Harish Gowda",
+    "upvotes_count": 8
   },
   {
     "report_id": 26,
@@ -1794,12 +1919,14 @@ export const MOCK_REPORTS = [
     "severity": "HIGH",
     "status": "LINKED_TO_CASE",
     "address_text": "Sarjapur Main Rd, Doddakannelli, Bengaluru, Karnataka 560035",
-    "photo_url": "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?w=600&auto=format&fit=crop&q=80",
+    "photo_url": "https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=600&auto=format&fit=crop&q=80",
     "latitude": 12.9103,
     "longitude": 77.6872,
     "upvote_count": 10,
     "created_at": "2026-11-10T22:30:00Z",
-    "reporter_name": "Divya Nambiar"
+    "reporter_name": "Divya Nambiar",
+    "citizen_name": "Divya Nambiar",
+    "upvotes_count": 10
   },
   {
     "report_id": 27,
@@ -1809,12 +1936,14 @@ export const MOCK_REPORTS = [
     "severity": "HIGH",
     "status": "LINKED_TO_CASE",
     "address_text": "Tumkur Rd, APMC Yard, Yeshwanthpur, Bengaluru, Karnataka 560022",
-    "photo_url": "https://images.unsplash.com/photo-1541888946425-d0fbb180c5f7?w=600&auto=format&fit=crop&q=80",
+    "photo_url": "https://images.unsplash.com/photo-1444723121867-7a241cacace9?w=600&auto=format&fit=crop&q=80",
     "latitude": 13.0285,
     "longitude": 77.5456,
     "upvote_count": 12,
     "created_at": "2026-11-12T12:00:00Z",
-    "reporter_name": "Chetan Das"
+    "reporter_name": "Chetan Das",
+    "citizen_name": "Chetan Das",
+    "upvotes_count": 12
   },
   {
     "report_id": 28,
@@ -1824,12 +1953,14 @@ export const MOCK_REPORTS = [
     "severity": "LOW",
     "status": "LINKED_TO_CASE",
     "address_text": "Bannerghatta Main Rd, Hulimavu, Bengaluru, Karnataka 560076",
-    "photo_url": "https://images.unsplash.com/photo-1590674899484-d5640e854abe?w=600&auto=format&fit=crop&q=80",
+    "photo_url": "https://images.unsplash.com/photo-1506157786151-b8491531f063?w=600&auto=format&fit=crop&q=80",
     "latitude": 12.8711,
     "longitude": 77.5978,
     "upvote_count": 14,
     "created_at": "2026-11-06T15:20:00Z",
-    "reporter_name": "Sneha Kulkarni"
+    "reporter_name": "Sneha Kulkarni",
+    "citizen_name": "Sneha Kulkarni",
+    "upvotes_count": 14
   },
   {
     "report_id": 29,
@@ -1839,12 +1970,14 @@ export const MOCK_REPORTS = [
     "severity": "HIGH",
     "status": "SUBMITTED",
     "address_text": "Mosque Rd, Cleveland Town, Frazer Town, Bengaluru, Karnataka 560005",
-    "photo_url": "https://images.unsplash.com/photo-1584467735871-8e85353a8413?w=600&auto=format&fit=crop&q=80",
+    "photo_url": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=600&auto=format&fit=crop&q=80",
     "latitude": 12.9968,
     "longitude": 77.6133,
     "upvote_count": 16,
     "created_at": "2026-11-13T16:50:00Z",
-    "reporter_name": "Pradeep Roy"
+    "reporter_name": "Pradeep Roy",
+    "citizen_name": "Pradeep Roy",
+    "upvotes_count": 16
   },
   {
     "report_id": 30,
@@ -1854,12 +1987,14 @@ export const MOCK_REPORTS = [
     "severity": "MEDIUM",
     "status": "LINKED_TO_CASE",
     "address_text": "Outer Ring Rd, Mahadevapura, Bengaluru, Karnataka 560048",
-    "photo_url": "https://images.unsplash.com/photo-1508873696983-2df5293cb325?w=600&auto=format&fit=crop&q=80",
+    "photo_url": "https://images.unsplash.com/photo-1572021335469-31706a17aaef?w=600&auto=format&fit=crop&q=80",
     "latitude": 12.9881,
     "longitude": 77.6895,
     "upvote_count": 3,
     "created_at": "2026-11-12T08:30:00Z",
-    "reporter_name": "Anjali Deshpande"
+    "reporter_name": "Anjali Deshpande",
+    "citizen_name": "Anjali Deshpande",
+    "upvotes_count": 3
   },
   {
     "report_id": 31,
@@ -1869,12 +2004,14 @@ export const MOCK_REPORTS = [
     "severity": "CRITICAL",
     "status": "SUBMITTED",
     "address_text": "Netaji Subhash Chandra Bose Rd, Marine Drive, Churchgate, Mumbai, Maharashtra 400020",
-    "photo_url": "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=600&auto=format&fit=crop&q=80",
+    "photo_url": "https://images.unsplash.com/photo-1596484552834-6a58f850e0a1?w=600&auto=format&fit=crop&q=80",
     "latitude": 18.9438,
     "longitude": 72.8232,
     "upvote_count": 5,
     "created_at": "2026-11-14T05:00:00Z",
-    "reporter_name": "Nikhil Kamat"
+    "reporter_name": "Nikhil Kamat",
+    "citizen_name": "Nikhil Kamat",
+    "upvotes_count": 5
   },
   {
     "report_id": 32,
@@ -1884,12 +2021,14 @@ export const MOCK_REPORTS = [
     "severity": "HIGH",
     "status": "LINKED_TO_CASE",
     "address_text": "Hill Rd, Bandra West, Mumbai, Maharashtra 400050",
-    "photo_url": "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?w=600&auto=format&fit=crop&q=80",
+    "photo_url": "https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=600&auto=format&fit=crop&q=80",
     "latitude": 19.0544,
     "longitude": 72.8402,
     "upvote_count": 7,
     "created_at": "2026-11-13T09:10:00Z",
-    "reporter_name": "Farhan Qureshi"
+    "reporter_name": "Farhan Qureshi",
+    "citizen_name": "Farhan Qureshi",
+    "upvotes_count": 7
   },
   {
     "report_id": 33,
@@ -1899,12 +2038,14 @@ export const MOCK_REPORTS = [
     "severity": "HIGH",
     "status": "LINKED_TO_CASE",
     "address_text": "Outer Circle, Connaught Place, New Delhi, Delhi 110001",
-    "photo_url": "https://images.unsplash.com/photo-1541888946425-d0fbb180c5f7?w=600&auto=format&fit=crop&q=80",
+    "photo_url": "https://images.unsplash.com/photo-1547683905-f686c993aae5?w=600&auto=format&fit=crop&q=80",
     "latitude": 28.6315,
     "longitude": 77.2167,
     "upvote_count": 9,
     "created_at": "2026-11-14T07:30:00Z",
-    "reporter_name": "Shalini Saxena"
+    "reporter_name": "Shalini Saxena",
+    "citizen_name": "Shalini Saxena",
+    "upvotes_count": 9
   },
   {
     "report_id": 34,
@@ -1914,12 +2055,14 @@ export const MOCK_REPORTS = [
     "severity": "CRITICAL",
     "status": "LINKED_TO_CASE",
     "address_text": "Cyber Towers Junction, Hitec City, Madhapur, Hyderabad, Telangana 500081",
-    "photo_url": "https://images.unsplash.com/photo-1584467735871-8e85353a8413?w=600&auto=format&fit=crop&q=80",
+    "photo_url": "https://images.unsplash.com/photo-1581244277943-fe4a9c777189?w=600&auto=format&fit=crop&q=80",
     "latitude": 17.4504,
     "longitude": 78.3808,
     "upvote_count": 11,
     "created_at": "2026-11-13T14:15:00Z",
-    "reporter_name": "Tarun Kapoor"
+    "reporter_name": "Tarun Kapoor",
+    "citizen_name": "Tarun Kapoor",
+    "upvotes_count": 11
   },
   {
     "report_id": 35,
@@ -1929,12 +2072,14 @@ export const MOCK_REPORTS = [
     "severity": "CRITICAL",
     "status": "SUBMITTED",
     "address_text": "Fergusson College Rd, Goodluck Chowk, Deccan Gymkhana, Pune, Maharashtra 411004",
-    "photo_url": "https://images.unsplash.com/photo-1508873696983-2df5293cb325?w=600&auto=format&fit=crop&q=80",
+    "photo_url": "https://images.unsplash.com/photo-1566232392379-afd9298e6a46?w=600&auto=format&fit=crop&q=80",
     "latitude": 18.5284,
     "longitude": 73.8436,
     "upvote_count": 13,
     "created_at": "2026-11-14T11:50:00Z",
-    "reporter_name": "Kiran Varma"
+    "reporter_name": "Kiran Varma",
+    "citizen_name": "Kiran Varma",
+    "upvotes_count": 13
   }
 ];
 

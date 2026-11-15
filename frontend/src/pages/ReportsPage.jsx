@@ -160,6 +160,7 @@ export default function ReportsPage({ onSelectCase }) {
                     src={rep.photo_url || 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=600&auto=format&fit=crop&q=80'}
                     alt="Infrastructure Defect"
                     className="w-full h-full object-cover"
+                    onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=600&auto=format&fit=crop&q=80'; }}
                   />
                   <div className="absolute top-3 left-3 px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-black/70 text-emerald-300 backdrop-blur-sm border border-emerald-500/30">
                     {rep.tracking_code}
